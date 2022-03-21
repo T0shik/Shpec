@@ -2,7 +2,7 @@
 
 namespace Playground;
 
-[SpecDefinition]
+[PropertyDefinitions]
 public class GenericProperties
 {
     public static readonly SpecProperty FirstName = Is.String;

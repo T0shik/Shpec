@@ -2,10 +2,12 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Shpec.Generators;
+namespace Shpec.Generators.Generators;
 
-public class SpecDefinitionAggregate : ISyntaxReceiver
+public class PropertyDefinitionsAggregate : ISyntaxReceiver
 {
+    public List<PropertyDefinition> Definitions { get; set; } = new();
+
     public void OnVisitSyntaxNode(SyntaxNode syntaxNode)
     {
         if (syntaxNode is not AttributeSyntax attributeSyntax)
@@ -13,13 +15,13 @@ public class SpecDefinitionAggregate : ISyntaxReceiver
             return;
         }
 
-        if (attributeSyntax.Name.ToString() != "SpecDefinition")
+        if (attributeSyntax.Name.ToString() != "PropertyDefinitions")
         {
             return;
         }
 
         var classDeclarationSyntax = attributeSyntax.GetParent<ClassDeclarationSyntax>();
-        PropertyDefinitions = classDeclarationSyntax.Members
+        Definitions = classDeclarationSyntax.Members
             .Where(m => m is FieldDeclarationSyntax)
             .Select(m =>
             {
@@ -27,8 +29,7 @@ public class SpecDefinitionAggregate : ISyntaxReceiver
                 var v = f.Declaration.Variables.First();
                 var exp = v.Initializer.Value;
 
-                return new PropertyInfo(
-                    ((MemberAccessExpressionSyntax) exp).Name.ToString(),
+                return new PropertyDefinition(
                     v.Identifier.Text,
                     exp switch
                     {
@@ -44,6 +45,4 @@ public class SpecDefinitionAggregate : ISyntaxReceiver
             })
             .ToList();
     }
-
-    public List<PropertyInfo> PropertyDefinitions { get; set; }
 }

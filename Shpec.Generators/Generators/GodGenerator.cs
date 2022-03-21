@@ -1,7 +1,7 @@
 ﻿using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 
-namespace Shpec.Generators;
+namespace Shpec.Generators.Generators;
 
 public class GodGenerator : ISyntaxReceiver
 {
@@ -25,6 +25,6 @@ public class GodGenerator : ISyntaxReceiver
         }
     }
 
-    public SchemaDeclarationAggregate Declarations => (SchemaDeclarationAggregate)SyntaxGenerators.FirstOrDefault(x => x is SchemaDeclarationAggregate);
-    public SpecDefinitionAggregate Definitions => (SpecDefinitionAggregate)SyntaxGenerators.FirstOrDefault(x => x is SpecDefinitionAggregate);
+    public PropertyDefinitionsAggregate PropertyDefinitions => (PropertyDefinitionsAggregate)SyntaxGenerators.FirstOrDefault(x => x is PropertyDefinitionsAggregate);
+    public DeclarationsAggregate Declarations => (DeclarationsAggregate)SyntaxGenerators.FirstOrDefault(x => x is DeclarationsAggregate);
 }

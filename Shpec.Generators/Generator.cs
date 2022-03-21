@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
+using Shpec.Generators.Generators;
 
 namespace Shpec.Generators;
 
@@ -9,10 +10,10 @@ public class TypeGenerator : ISourceGenerator
     {
         var syntaxReceiver = (GodGenerator)context.SyntaxReceiver;
 
-        foreach (var declaration in syntaxReceiver.Declarations.Schemas)
+        foreach (var declaration in syntaxReceiver.PropertyDefinitions.Definitions)
         {
             var properties = declaration.Properties
-                .Select(x => syntaxReceiver.Definitions.PropertyDefinitions
+                .Select(x => syntaxReceiver.Declarations.Definitions
                     .FirstOrDefault(pd => pd.Identifier == x))
                 .ToList();
 

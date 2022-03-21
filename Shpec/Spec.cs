@@ -28,11 +28,11 @@ public struct Schema
 }
 
 [System.AttributeUsage(AttributeTargets.Field, AllowMultiple = false)]
-public class DeclareSchemaAttribute : Attribute
+public class SchemaAttribute : Attribute
 {
 }
 
 [System.AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
-public class SpecDefinitionAttribute : Attribute
+public class PropertyDefinitionsAttribute : Attribute
 {
 }

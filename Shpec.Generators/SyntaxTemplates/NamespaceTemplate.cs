@@ -1,0 +1,16 @@
+﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+
+namespace Shpec.Generators.SyntaxTemplates;
+
+public class NamespaceTemplate
+{
+    public static MemberDeclarationSyntax Create(NamespaceSeed seed)
+    {
+        return FileScopedNamespaceDeclaration(
+                IdentifierName(seed.Identifier))
+            .WithMembers(
+                SingletonList(ClassTemplate.Create(seed.Class))
+            );
+    }
+}

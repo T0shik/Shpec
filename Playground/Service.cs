@@ -1,12 +1,11 @@
-﻿using System;
-using Shpec;
+﻿using Shpec;
 using static Playground.GenericProperties;
 
 namespace Playground;
 
 public partial class Service
 {
-    [DeclareSchema]
+    [Schema]
     public Schema PersonSchema = Schema.Define(FirstName, LastName, Age);
 
     public partial class Person

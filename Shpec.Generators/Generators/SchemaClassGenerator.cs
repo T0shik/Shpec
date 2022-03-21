@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Shpec.Generators;
+namespace Shpec.Generators.Generators;
 
 public class SchemaClassGenerator
 {
@@ -13,7 +13,7 @@ public class SchemaClassGenerator
         string nameSpace,
         string parentName,
         string className,
-        IEnumerable<PropertyInfo> properties
+        IEnumerable<PropertySeed> properties
     )
     {
         Name = $"{nameSpace}{parentName}{className}";
@@ -40,7 +40,7 @@ public class SchemaClassGenerator
             .GetText(Encoding.UTF8);
     }
 
-    private MemberDeclarationSyntax[] MemberList(IEnumerable<PropertyInfo> properties)
+    private MemberDeclarationSyntax[] MemberList(IEnumerable<PropertySeed> properties)
     {
         return properties
             .Select(p => PropertyDeclaration(
