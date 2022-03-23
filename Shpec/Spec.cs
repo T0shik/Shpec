@@ -1,4 +1,6 @@
-﻿namespace Shpec;
+﻿using System;
+
+namespace Shpec;
 
 public class Is
 {

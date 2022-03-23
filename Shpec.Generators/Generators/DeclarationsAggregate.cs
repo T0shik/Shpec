@@ -1,4 +1,6 @@
-﻿using System.Collections.Immutable;
+﻿using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -6,7 +8,7 @@ namespace Shpec.Generators.Generators;
 
 public class DeclarationsAggregate : ISyntaxReceiver
 {
-    public readonly List<Declaration> Declarations = new();
+    public readonly Dictionary<string, Declaration> Declarations = new();
 
     public void OnVisitSyntaxNode(SyntaxNode syntaxNode)
     {
@@ -35,16 +37,18 @@ public class DeclarationsAggregate : ISyntaxReceiver
         var classDeclaration = fieldDeclaration.GetParent<ClassDeclarationSyntax>();
         var propertyNames = propertyArguments.Select(x => x.GetText().ToString()).ToImmutableArray();
 
-        var variableDeclarator = fieldDeclaration.DescendantNodes(_ => true)
-            .OfType<VariableDeclaratorSyntax>()
-            .Single();
-        
-        
+        var ns = namespaceDeclaration.Name.ToString();
+        var clazz = classDeclaration.Identifier.ToString();
 
-        Declarations.Add(new(
-            namespaceDeclaration.Name.ToString(),
-            classDeclaration.Identifier.ToString(),
-            propertyNames
-        ));
+        var key = $"{ns}.{clazz}";
+        Declaration declaration = new(ns, clazz, propertyNames);
+        if (Declarations.ContainsKey(key))
+        {
+            Declarations[key] += declaration;
+        }
+        else
+        {
+            Declarations[key] = declaration;
+        }
     }
 }

@@ -1,30 +1,39 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.Linq;
+using Microsoft.CodeAnalysis;
 using Shpec.Generators.Generators;
 
 namespace Shpec.Generators;
 
 [Generator(LanguageNames.CSharp)]
-public class TypeGenerator : ISourceGenerator
+public class SchemaGenerator : ISourceGenerator
 {
     public void Execute(GeneratorExecutionContext context)
     {
-        var syntaxReceiver = (GodGenerator)context.SyntaxReceiver;
-
-        foreach (var declaration in syntaxReceiver.PropertyDefinitions.Definitions)
+        if (context.SyntaxReceiver is not GodGenerator syntaxReceiver)
         {
-            var properties = declaration.Properties
-                .Select(x => syntaxReceiver.Declarations.Definitions
-                    .FirstOrDefault(pd => pd.Identifier == x))
-                .ToList();
+            throw new ArgumentNullException(nameof(GodGenerator));
+        }
 
-            var classGen = new SchemaClassGenerator(
-                declaration.NameSpace,
-                declaration.ParentClass,
-                declaration.Clazz,
-                properties
+        var definitions = syntaxReceiver.PropertyDefinitions.Definitions;
+        foreach (var declaration in syntaxReceiver.Declarations)
+        {
+            NamespaceSeed ns = new(
+                declaration.Namespace,
+                new(declaration.Class)
+                {
+                    properties = declaration.Properties
+                        .Select(x =>
+                        {
+                            var (identifier, syntaxKind) = definitions.First(d => d.Identifier == x);
+                            return new PropertySeed(identifier, syntaxKind);
+                        })
+                        .ToArray(),
+                    partial = true,
+                }
             );
-
-            context.AddSource($"{classGen.Name}.g", classGen.Source);
+            
+            var classGen = new SchemaClassGenerator(ns);
+            context.AddSource(classGen.SourceName, classGen.Source);
         }
     }
 

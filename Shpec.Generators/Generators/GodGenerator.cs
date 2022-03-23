@@ -1,4 +1,7 @@
-﻿using System.Collections.Immutable;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 using Microsoft.CodeAnalysis;
 
 namespace Shpec.Generators.Generators;
@@ -26,5 +29,5 @@ public class GodGenerator : ISyntaxReceiver
     }
 
     public PropertyDefinitionsAggregate PropertyDefinitions => (PropertyDefinitionsAggregate)SyntaxGenerators.FirstOrDefault(x => x is PropertyDefinitionsAggregate);
-    public DeclarationsAggregate Declarations => (DeclarationsAggregate)SyntaxGenerators.FirstOrDefault(x => x is DeclarationsAggregate);
+    public List<Declaration> Declarations => ((DeclarationsAggregate)SyntaxGenerators.FirstOrDefault(x => x is DeclarationsAggregate)).Declarations.Values.ToList();
 }

@@ -10,7 +10,7 @@ public class PropertyTemplate
     {
         return PropertyDeclaration(
                 PredefinedType(
-                    Token(seed.ValueType)),
+                    Token(seed.Type)),
                 Identifier(seed.Identifier))
             .WithModifiers(
                 TokenList(

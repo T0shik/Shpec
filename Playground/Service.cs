@@ -1,15 +1,18 @@
-﻿using Shpec;
-using static Playground.GenericProperties;
+﻿using System;
+using Shpec;
 
 namespace Playground;
 
 public partial class Service
 {
-    [Schema]
-    public Schema PersonSchema = Schema.Define(FirstName, LastName, Age);
-
     public partial class Person
     {
+        [Schema] Schema _s = Schema.Define(
+            GenericProperties.FirstName,
+            GenericProperties.LastName,
+            GenericProperties.Age
+        );
+
         public string FullName => FirstName + " " + LastName;
         public string Introduce => $"Hello, my name is {FirstName} and I am {Age} year's old.";
     }
