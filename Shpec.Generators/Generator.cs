@@ -9,22 +9,26 @@ public class SchemaGenerator : ISourceGenerator
 {
     public void Execute(GeneratorExecutionContext context)
     {
-        if (context.SyntaxReceiver is not GodGenerator syntaxReceiver)
+        if (context.SyntaxReceiver is not SyntaxReceiver syntaxReceiver)
         {
-            throw new ArgumentNullException(nameof(GodGenerator));
+            throw new ArgumentNullException(nameof(SyntaxReceiver));
         }
 
         var definitions = syntaxReceiver.PropertyDefinitions.Definitions;
         foreach (var declaration in syntaxReceiver.Declarations)
         {
             NamespaceSeed ns = new(
-                declaration.Namespace,
-                new(declaration.Class)
+                declaration.namespaze,
+                new(
+                    declaration.clazz.identifier,
+                    declaration.clazz.accessibility,
+                    BuildParents(declaration.clazz.parent)
+                    )
                 {
-                    properties = declaration.Properties
+                    properties = declaration.properties
                         .Select(x =>
                         {
-                            var (identifier, syntaxKind) = definitions.First(d => d.Identifier == x);
+                            var (identifier, syntaxKind) = definitions.First(d => d.identifier == x);
                             return new PropertySeed(identifier, syntaxKind);
                         })
                         .ToArray(),
@@ -37,8 +41,13 @@ public class SchemaGenerator : ISourceGenerator
         }
     }
 
+    private static ClassSeed? BuildParents(ClassDeclataion parent)
+    {
+        return parent == null ? null : new(parent.identifier, parent.accessibility, BuildParents(parent.parent));
+    }
+
     public void Initialize(GeneratorInitializationContext context)
     {
-        context.RegisterForSyntaxNotifications(() => new GodGenerator());
+        context.RegisterForSyntaxNotifications(() => new SyntaxReceiver());
     }
 }

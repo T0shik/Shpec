@@ -1,36 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
 namespace Shpec.Generators;
 
-public record PropertySeed(string Identifier, SyntaxKind Type);
+record PropertySeed(string identifier, SyntaxKind type);
 
-public record ClassSeed(string Identifier)
+record ClassSeed(string identifier, SyntaxKind accessibility, ClassSeed? parent)
 {
-    public ClassSeed? parent = null;
-    public ClassSeed[] classes = Array.Empty<ClassSeed>();
-    public PropertySeed[] properties = Array.Empty<PropertySeed>();
-    public bool partial = false;
+    public ClassSeed[] classes { get; set; } = Array.Empty<ClassSeed>();
+    public PropertySeed[] properties { get; set; } = Array.Empty<PropertySeed>();
+    public bool partial { get; set; } = false;
 }
 
-public record NamespaceSeed(string Identifier, ClassSeed Class);
+record NamespaceSeed(string identifier, ClassSeed clazz);
+record PropertyDefinition(string identifier, SyntaxKind type);
 
-public class Node<T>
-{
-    public T Value { get; set; }
-    public T Next { get; set; }
-    public bool HasNext() => Next != null;
-}
+record Declaration(string namespaze, ClassDeclataion clazz, IEnumerable<string> properties);
 
-public record Definition;
-public record PropertyDefinition(string Identifier, SyntaxKind Type) : Definition;
-
-public record Declaration(string Namespace, string Class, IEnumerable<string> Properties)
-{
-    public static Declaration operator +(Declaration a, Declaration b)
-    {
-        return new(a.Namespace, a.Class, a.Properties.Concat(b.Properties));
-    }
-}
+record ClassDeclataion(string identifier, SyntaxKind accessibility, ClassDeclataion parent);

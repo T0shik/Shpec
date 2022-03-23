@@ -4,14 +4,14 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Shpec.Generators.SyntaxTemplates;
 
-public class PropertyTemplate
+class PropertyTemplate
 {
     public static MemberDeclarationSyntax Create(PropertySeed seed)
     {
         return PropertyDeclaration(
                 PredefinedType(
-                    Token(seed.Type)),
-                Identifier(seed.Identifier))
+                    Token(seed.type)),
+                Identifier(seed.identifier))
             .WithModifiers(
                 TokenList(
                     Token(SyntaxKind.PublicKeyword)))

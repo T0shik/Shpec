@@ -5,11 +5,11 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Shpec.Generators.SyntaxTemplates;
 
-public class ClassTemplate
+class ClassTemplate
 {
     public static MemberDeclarationSyntax Create(ClassSeed seed)
     {
-        var classTokens = new[] { Token(SyntaxKind.PublicKeyword) }.AsEnumerable();
+        var classTokens = new[] { Token(seed.accessibility) }.AsEnumerable();
         if (seed.partial)
         {
             classTokens = classTokens.Append(Token(SyntaxKind.PartialKeyword));
@@ -18,7 +18,7 @@ public class ClassTemplate
         var members = seed.properties.Select(PropertyTemplate.Create)
             .Concat(seed.classes.Select(Create));
         
-        return ClassDeclaration(seed.Identifier)
+        return ClassDeclaration(seed.identifier)
             .WithModifiers(TokenList(classTokens))
             .WithMembers(List(members));
     }

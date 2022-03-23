@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Shpec.Generators.Generators;
 
-public class PropertyDefinitionsAggregate : ISyntaxReceiver
+class PropertyDefinitionsAggregate : ISyntaxReceiver
 {
     public List<PropertyDefinition> Definitions { get; set; } = new();
 
@@ -22,7 +22,7 @@ public class PropertyDefinitionsAggregate : ISyntaxReceiver
             return;
         }
 
-        var classDeclarationSyntax = attributeSyntax.GetParent<ClassDeclarationSyntax>();
+        var classDeclarationSyntax = attributeSyntax.GetParent<ClassDeclarationSyntax>(throwError: true);
         Definitions = classDeclarationSyntax.Members
             .Where(m => m is FieldDeclarationSyntax)
             .Select(m =>

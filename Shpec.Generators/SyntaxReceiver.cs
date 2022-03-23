@@ -6,12 +6,12 @@ using Microsoft.CodeAnalysis;
 
 namespace Shpec.Generators.Generators;
 
-public class GodGenerator : ISyntaxReceiver
+class SyntaxReceiver : ISyntaxReceiver
 {
-    public GodGenerator()
+    public SyntaxReceiver()
     {
         var syntaxReceiver = typeof(ISyntaxReceiver);
-        var godType = typeof(GodGenerator);
+        var godType = typeof(SyntaxReceiver);
         SyntaxGenerators = godType.Assembly.GetTypes()
             .Where(x => x.GetInterfaces().Any(i => i == syntaxReceiver) && x != godType)
             .Select(t => (ISyntaxReceiver)Activator.CreateInstance(t))

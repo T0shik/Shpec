@@ -6,31 +6,31 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Shpec.Generators.Generators;
 
-public class SchemaClassGenerator
+class SchemaClassGenerator
 {
     private readonly NamespaceSeed _seed;
 
-    public SchemaClassGenerator(NamespaceSeed seed)
+    internal SchemaClassGenerator(NamespaceSeed seed)
     {
         _seed = seed;
     }
 
-    public SourceText Source => CompilationUnit()
+    internal SourceText Source => CompilationUnit()
         .WithMembers(SingletonList(NamespaceTemplate.Create(_seed)))
         .NormalizeWhitespace()
         .GetText(Encoding.UTF8);
 
-    public string SourceName => GetName();
+    internal string SourceName => GetName();
 
     private string GetName()
     {
         var sb = new StringBuilder();
-        sb.Append(_seed.Identifier);
+        sb.Append(_seed.identifier);
         var i = sb.Length;
-        var cc = _seed.Class;
+        var cc = _seed.clazz;
         while (cc != null)
         {
-            sb.Insert(i, cc.Identifier);
+            sb.Insert(i, cc.identifier);
             cc = cc.parent;
         }
 
