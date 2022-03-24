@@ -21,7 +21,7 @@ class DeclarationsAggregate : ISyntaxReceiver
             return;
         }
 
-        var fieldDeclaration = attributeSyntax.GetParent<FieldDeclarationSyntax>(throwError:true);
+        var fieldDeclaration = attributeSyntax.GetParent<FieldDeclarationSyntax>(throwError: true);
 
         var propertyArguments = fieldDeclaration.DescendantNodes(_ => true)
             .OfType<ArgumentSyntax>()
@@ -55,7 +55,8 @@ class DeclarationsAggregate : ISyntaxReceiver
     {
         var parent = classDeclarationSyntax.GetParent<ClassDeclarationSyntax>();
         var id = classDeclarationSyntax.Identifier.ToString();
-        var accessibility = classDeclarationSyntax.Modifiers.First().Value switch
+
+        var accessibility = classDeclarationSyntax.Modifiers.First().ValueText switch
         {
             "public" => SyntaxKind.PublicKeyword,
             "private" => SyntaxKind.PrivateKeyword,
@@ -63,8 +64,10 @@ class DeclarationsAggregate : ISyntaxReceiver
             _ => SyntaxKind.InternalKeyword
         };
 
+        var statik = classDeclarationSyntax.Modifiers.Any(x => x.ValueText == "static");
+
         return parent == null
-            ? new(id, accessibility, null)
-            : new(id, accessibility, CaptureClassHierarchy(parent));
+            ? new(id, accessibility, null, statik)
+            : new(id, accessibility, CaptureClassHierarchy(parent), statik);
     }
 }

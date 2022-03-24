@@ -1,9 +1,14 @@
 ﻿using Shpec;
 
-namespace Playground;
+namespace Playground.UseCases;
 
-public partial class Service
+public partial class Service : IUseCase
 {
+    public void Execute()
+    {
+        new Service().Do(new() { FirstName = "Foo", LastName = "Bar", Age = 10 });
+    }
+
     public partial class Person
     {
         [Schema] Schema _s = Schema.Define(

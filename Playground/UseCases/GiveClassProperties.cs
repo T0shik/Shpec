@@ -1,8 +1,8 @@
 ﻿using Shpec;
 
-namespace Playground;
+namespace Playground.UseCases;
 
-internal partial class GiveClassProperties
+internal partial class GiveClassProperties : IUseCase
 {
     [Schema] Schema _p = Schema.Define(
         GenericProperties.FirstName,
@@ -10,9 +10,9 @@ internal partial class GiveClassProperties
         GenericProperties.Age
         );
 
-    public GiveClassProperties Create()
+    public void Execute()
     {
-        return new GiveClassProperties
+        var a = new GiveClassProperties
         {
             FirstName = "foo",
             LastName = "bar",

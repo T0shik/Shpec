@@ -1,3 +1,27 @@
-﻿using Playground;
+﻿var useCases = typeof(IUseCase).Assembly.GetTypes()
+    .Where(x => x.IsClass && !x.IsAbstract && x.GetInterfaces().Contains(typeof(IUseCase)))
+    .Select(x =>
+    {
+        try
+        {
+            (Activator.CreateInstance(x) as IUseCase).Execute();
+            return true;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($" --- {x.Name} --- ");
+            Console.WriteLine(e.Message);
+            Console.WriteLine(e.StackTrace);
+        }
 
-new Service().Do(new() { FirstName = "Foo", LastName = "Bar", Age = 10});
+        return false;
+    })
+    .ToList();
+
+Console.WriteLine($"Passing Use Cases: {useCases.Count(x => x)}/{useCases.Count}");
+
+
+public interface IUseCase
+{
+    void Execute();
+}

@@ -22,7 +22,7 @@ public class SchemaGenerator : ISourceGenerator
                     declaration.Class.Identifier,
                     declaration.Class.Accessibility,
                     BuildParents(declaration.Class.Parent)
-                    )
+                )
                 {
                     Properties = declaration.Properties
                         .Select(x =>
@@ -31,18 +31,20 @@ public class SchemaGenerator : ISourceGenerator
                             return new PropertySeed(identifier, syntaxKind);
                         })
                         .ToArray(),
-                    Partial = true,
+                    Static = declaration.Class.Static,
                 }
             );
-            
+
             var classGen = new SchemaClassGenerator(ns);
             context.AddSource(classGen.SourceName, classGen.Source);
         }
     }
 
-    private static ClassSeed? BuildParents(ClassDeclaration parent)
+    private static ClassSeed? BuildParents(ClassDeclaration? parent)
     {
-        return parent == null ? null : new(parent.Identifier, parent.Accessibility, BuildParents(parent.Parent));
+        return parent == null
+            ? null
+            : new(parent.Identifier, parent.Accessibility, BuildParents(parent.Parent));
     }
 
     public void Initialize(GeneratorInitializationContext context)
