@@ -29,8 +29,13 @@ class ClassTemplate
             classTokens = classTokens.Append(Token(SyntaxKind.StaticKeyword));
         }
 
-        var members = seed.Properties.Select(PropertyTemplate.Create)
-            .Concat(seed.Classes.Select(Create));
+        var members = seed.Members.Select(x => x switch
+        {
+            PropertySeed ps => PropertyTemplate.Create(ps),
+            ComputedPropertySeed cps => ComputedPropertyTemplate.Create(cps),
+            ClassSeed cs => Create(cs),
+            _ => throw new NotImplementedException("Unhandled Seed."),
+        });
 
         if (child != null)
         {

@@ -14,16 +14,17 @@ public partial class Service : IUseCase
         _schema _s => _schema.declare(
                 Property.FirstName,
                 Property.LastName,
-                Property.Age
+                Property.Age,
+                Computed.FullName
+                //Computed.Introduce,
+                //Computed.Initials
             );
-
-        public string FullName => FirstName + " " + LastName;
-        public string Introduce => $"Hello, my name is {FirstName} and I am {Age} year's old.";
     }
 
     public void Do(Person person)
     {
         Console.WriteLine(person.FullName);
-        Console.WriteLine(person.Introduce);
+        //Console.WriteLine(person.Introduce);
+        //Console.WriteLine(person.Initials);
     }
 }

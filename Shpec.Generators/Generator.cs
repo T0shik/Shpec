@@ -13,7 +13,8 @@ public class SchemaGenerator : ISourceGenerator
             throw new ArgumentNullException(nameof(SyntaxReceiver));
         }
 
-        var definitions = syntaxReceiver.PropertyDefinitions.Definitions;
+        var properties = syntaxReceiver.PropertyDefinitions.Definitions;
+        var computedProperties = syntaxReceiver.ComputedPropertyDefinitions.Definitions;
         foreach (var declaration in syntaxReceiver.Declarations)
         {
             NamespaceSeed ns = new(
@@ -24,13 +25,26 @@ public class SchemaGenerator : ISourceGenerator
                     BuildParents(declaration.Class.Parent)
                 )
                 {
-                    Properties = declaration.Properties
-                        .Select(x =>
+                    Members = declaration.Members
+                        .Select<string, Seed>(x =>
                         {
-                            var (identifier, syntaxKind) = definitions.First(d => d.Identifier == x);
-                            return new PropertySeed(identifier, syntaxKind);
+                            var propertyDefinition = properties.FirstOrDefault(d => d.Identifier == x);
+                            if (propertyDefinition != null)
+                            {
+                                var (identifier, syntaxKind) = propertyDefinition;
+                                return new PropertySeed(identifier, syntaxKind);
+                            }
+
+                            var computedDefinition = computedProperties.FirstOrDefault(d => d.Identifier == x);
+                            if (computedDefinition != null)
+                            {
+                                var (identifier, syntaxKind, exp, lambda) = computedDefinition;
+                                return new ComputedPropertySeed(identifier, syntaxKind, exp, lambda);
+                            }
+
+                            throw new Exception($"Failed to find definition for {x} of {declaration.Class.Identifier}");
                         })
-                        .ToArray(),
+                        .ToList(),
                     Static = declaration.Class.Static,
                 }
             );

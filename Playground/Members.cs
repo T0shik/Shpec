@@ -13,6 +13,12 @@ public static class Property
 
 public class Computed
 {
-    public static _computed<string> FullName => _compute<string>.from($"{Property.FirstName} {Property.LastName}");
-    public static _computed<string> Initials => _compute<string>.from($"{Property.FirstName[0]}.{Property.LastName[0]}.");
+    public static string FullName => new _computed($"{Property.FirstName} {Property.LastName}");
+    //public static string Introduce => new _computed(() => $"Hello, my name is {Property.FirstName} and I am {Property.Age} year's old.");
+    //public static string Initials => new _computed(() =>
+    //{
+    //    var fn = Property.FirstName[0];
+    //    var ln = Property.LastName[0];
+    //    return $"{fn}.{ln}.";
+    //});
 }

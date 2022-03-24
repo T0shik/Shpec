@@ -39,7 +39,7 @@ class DeclarationsAggregate : ISyntaxReceiver
         if (Declarations.ContainsKey(key))
         {
             var d = Declarations[key];
-            Declarations[key] = d with { Properties = d.Properties.Concat(propertyNames) };
+            Declarations[key] = d with { Members = d.Members.Concat(propertyNames) };
         }
         else
         {
@@ -59,7 +59,7 @@ class DeclarationsAggregate : ISyntaxReceiver
             _ => SyntaxKind.InternalKeyword
         };
 
-        var statik = classDeclarationSyntax.Modifiers.Any(x => x.ValueText == "static");
+        var statik = classDeclarationSyntax.Modifiers.Any(x => x.IsKind(SyntaxKind.StaticKeyword));
 
         var parent = classDeclarationSyntax.TryGetParent<ClassDeclarationSyntax>();
         return parent == null

@@ -4,6 +4,7 @@
     {
         try
         {
+            Console.WriteLine($"running: {x.Name}");
             (Activator.CreateInstance(x) as IUseCase).Execute();
             return true;
         }
