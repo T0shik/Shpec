@@ -25,13 +25,13 @@ class SchemaClassGenerator
     private string GetName()
     {
         var sb = new StringBuilder();
-        sb.Append(_seed.identifier);
+        sb.Append(_seed.Identifier);
         var i = sb.Length;
-        var cc = _seed.clazz;
+        var cc = _seed.Clazz;
         while (cc != null)
         {
-            sb.Insert(i, cc.identifier);
-            cc = cc.parent;
+            sb.Insert(i, cc.Identifier);
+            cc = cc.Parent;
         }
 
         sb.Append(".g");

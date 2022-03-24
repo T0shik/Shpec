@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
+﻿using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -45,7 +43,7 @@ class DeclarationsAggregate : ISyntaxReceiver
         if (Declarations.ContainsKey(key))
         {
             var d = Declarations[key];
-            Declarations[key] = d with { properties = d.properties.Concat(propertyNames) };
+            Declarations[key] = d with { Properties = d.Properties.Concat(propertyNames) };
         }
         else
         {
@@ -53,7 +51,7 @@ class DeclarationsAggregate : ISyntaxReceiver
         }
     }
 
-    private static ClassDeclataion CaptureClassHierarchy(ClassDeclarationSyntax classDeclarationSyntax)
+    private static ClassDeclaration CaptureClassHierarchy(ClassDeclarationSyntax classDeclarationSyntax)
     {
         var parent = classDeclarationSyntax.GetParent<ClassDeclarationSyntax>();
         var id = classDeclarationSyntax.Identifier.ToString();

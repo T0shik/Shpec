@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Shpec.Generators.Generators;
 
 namespace Shpec.Generators;
@@ -18,21 +17,21 @@ public class SchemaGenerator : ISourceGenerator
         foreach (var declaration in syntaxReceiver.Declarations)
         {
             NamespaceSeed ns = new(
-                declaration.namespaze,
+                declaration.Namespace,
                 new(
-                    declaration.clazz.identifier,
-                    declaration.clazz.accessibility,
-                    BuildParents(declaration.clazz.parent)
+                    declaration.Class.Identifier,
+                    declaration.Class.Accessibility,
+                    BuildParents(declaration.Class.Parent)
                     )
                 {
-                    properties = declaration.properties
+                    Properties = declaration.Properties
                         .Select(x =>
                         {
-                            var (identifier, syntaxKind) = definitions.First(d => d.identifier == x);
+                            var (identifier, syntaxKind) = definitions.First(d => d.Identifier == x);
                             return new PropertySeed(identifier, syntaxKind);
                         })
                         .ToArray(),
-                    partial = true,
+                    Partial = true,
                 }
             );
             
@@ -41,9 +40,9 @@ public class SchemaGenerator : ISourceGenerator
         }
     }
 
-    private static ClassSeed? BuildParents(ClassDeclataion parent)
+    private static ClassSeed? BuildParents(ClassDeclaration parent)
     {
-        return parent == null ? null : new(parent.identifier, parent.accessibility, BuildParents(parent.parent));
+        return parent == null ? null : new(parent.Identifier, parent.Accessibility, BuildParents(parent.Parent));
     }
 
     public void Initialize(GeneratorInitializationContext context)

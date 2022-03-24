@@ -1,5 +1,4 @@
-﻿using System;
-using Shpec;
+﻿using Shpec;
 
 namespace Playground;
 

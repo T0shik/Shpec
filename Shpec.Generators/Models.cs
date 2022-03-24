@@ -1,23 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
+﻿using Microsoft.CodeAnalysis.CSharp;
 
 namespace Shpec.Generators;
 
-record PropertySeed(string identifier, SyntaxKind type);
+record PropertySeed(string Identifier, SyntaxKind Type);
 
-record ClassSeed(string identifier, SyntaxKind accessibility, ClassSeed? parent)
+record ClassSeed(string Identifier, SyntaxKind Accessibility, ClassSeed? Parent)
 {
-    public ClassSeed[] classes { get; set; } = Array.Empty<ClassSeed>();
-    public PropertySeed[] properties { get; set; } = Array.Empty<PropertySeed>();
-    public bool partial { get; set; } = false;
+    public ClassSeed[] Classes { get; set; } = Array.Empty<ClassSeed>();
+    public PropertySeed[] Properties { get; set; } = Array.Empty<PropertySeed>();
+    public bool Partial { get; set; } = false;
 }
 
-record NamespaceSeed(string identifier, ClassSeed clazz);
-record PropertyDefinition(string identifier, SyntaxKind type);
+record NamespaceSeed(string Identifier, ClassSeed Clazz);
+record PropertyDefinition(string Identifier, SyntaxKind Type);
 
-record Declaration(string namespaze, ClassDeclataion clazz, IEnumerable<string> properties);
+record Declaration(string Namespace, ClassDeclaration Class, IEnumerable<string> Properties);
 
-record ClassDeclataion(string identifier, SyntaxKind accessibility, ClassDeclataion parent);
+record ClassDeclaration(string Identifier, SyntaxKind Accessibility, ClassDeclaration Parent);

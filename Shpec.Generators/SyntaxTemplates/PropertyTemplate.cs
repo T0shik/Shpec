@@ -10,8 +10,8 @@ class PropertyTemplate
     {
         return PropertyDeclaration(
                 PredefinedType(
-                    Token(seed.type)),
-                Identifier(seed.identifier))
+                    Token(seed.Type)),
+                Identifier(seed.Identifier))
             .WithModifiers(
                 TokenList(
                     Token(SyntaxKind.PublicKeyword)))
