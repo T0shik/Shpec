@@ -10,39 +10,26 @@ class PropertyDefinitionsAggregate : ISyntaxReceiver
 
     public void OnVisitSyntaxNode(SyntaxNode syntaxNode)
     {
-        if (syntaxNode is not AttributeSyntax attributeSyntax)
+        if (syntaxNode is not ObjectCreationExpressionSyntax objectCreationExpressionSyntax)
         {
             return;
         }
 
-        if (attributeSyntax.Name.ToString() != "PropertyDefinitions")
+        if (!objectCreationExpressionSyntax.Type.GetText().ToString().Equals("_property"))
         {
             return;
         }
 
-        var classDeclarationSyntax = attributeSyntax.GetParent<ClassDeclarationSyntax>(throwError: true);
-        Definitions = classDeclarationSyntax.Members
-            .Where(m => m is FieldDeclarationSyntax)
-            .Select(m =>
-            {
-                var f = m as FieldDeclarationSyntax;
-                var v = f.Declaration.Variables.First();
-                var exp = v.Initializer.Value;
+        var propertyDeclarationSyntax = objectCreationExpressionSyntax
+            .GetParent<PropertyDeclarationSyntax>();
 
-                return new PropertyDefinition(
-                    v.Identifier.Text,
-                    exp switch
-                    {
-                        MemberAccessExpressionSyntax ma => ma.Name.ToString() switch
-                        {
-                            "String" => SyntaxKind.StringKeyword,
-                            "Int" => SyntaxKind.IntKeyword,
-                            _ => SyntaxKind.StringKeyword,
-                        },
-                        _ => SyntaxKind.StringKeyword,
-                    }
-                );
-            })
-            .ToList();
+        var identifier = propertyDeclarationSyntax.Identifier.ToString();
+        if(propertyDeclarationSyntax.Type is not PredefinedTypeSyntax predefinedTypeSyntax)
+        {
+            throw new Exception($"Error:\n{propertyDeclarationSyntax.GetText()}");
+        }
+        var type = predefinedTypeSyntax.Keyword.Kind();
+        
+        Definitions.Add(new PropertyDefinition(identifier, type));
     }
 }

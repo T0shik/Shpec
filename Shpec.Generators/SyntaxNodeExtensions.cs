@@ -4,7 +4,7 @@ namespace Shpec.Generators;
 
 public static class SyntaxNodeExtensions
 {
-    public static T? GetParent<T>(this SyntaxNode @this, bool throwError = false)
+    public static T GetParent<T>(this SyntaxNode @this)
         where T : SyntaxNode
     {
         var parent = @this.Parent;
@@ -12,10 +12,26 @@ public static class SyntaxNodeExtensions
         {
             if (parent == null)
             {
-                if (throwError)
-                {
-                    throw new Exception($"Failed to find parent {typeof(T).Name}, for {@this.GetType().Name}.\n{@this.GetText()}");
-                }
+                throw new Exception($"Failed to find parent {typeof(T).Name}, for {@this.GetType().Name}.\n{@this.GetText()}");
+            }
+
+            if (parent is T t)
+            {
+                return t;
+            }
+
+            parent = parent.Parent;
+        }
+    }
+
+    public static T? TryGetParent<T>(this SyntaxNode @this)
+        where T : SyntaxNode
+    {
+        var parent = @this.Parent;
+        while (true)
+        {
+            if (parent == null)
+            {
                 return null;
             }
 

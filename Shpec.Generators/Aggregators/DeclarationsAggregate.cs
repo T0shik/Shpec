@@ -11,29 +11,25 @@ class DeclarationsAggregate : ISyntaxReceiver
 
     public void OnVisitSyntaxNode(SyntaxNode syntaxNode)
     {
-        if (syntaxNode is not AttributeSyntax attributeSyntax)
+        if (syntaxNode is not InvocationExpressionSyntax invocationExpressionSyntax)
         {
             return;
         }
 
-        if (attributeSyntax.Name.ToString() != "Schema")
+        if (!invocationExpressionSyntax.Expression.ToString().Equals("_schema.declare"))
         {
             return;
         }
 
-        var fieldDeclaration = attributeSyntax.GetParent<FieldDeclarationSyntax>(throwError: true);
-
-        var propertyArguments = fieldDeclaration.DescendantNodes(_ => true)
-            .OfType<ArgumentSyntax>()
-            .ToList();
+        var propertyArguments = invocationExpressionSyntax.ArgumentList.Arguments.ToList();
 
         if (propertyArguments is not { Count: > 0 })
         {
             return;
         }
 
-        var namespaceDeclaration = fieldDeclaration.GetParent<FileScopedNamespaceDeclarationSyntax>(throwError: true);
-        var classDeclaration = fieldDeclaration.GetParent<ClassDeclarationSyntax>(throwError: true);
+        var namespaceDeclaration = invocationExpressionSyntax.GetParent<FileScopedNamespaceDeclarationSyntax>();
+        var classDeclaration = invocationExpressionSyntax.GetParent<ClassDeclarationSyntax>();
         var propertyNames = propertyArguments.Select(x => x.Expression.ToString().Split('.').Last()).ToImmutableArray();
 
         var ns = namespaceDeclaration.Name.ToString();
@@ -53,7 +49,6 @@ class DeclarationsAggregate : ISyntaxReceiver
 
     private static ClassDeclaration CaptureClassHierarchy(ClassDeclarationSyntax classDeclarationSyntax)
     {
-        var parent = classDeclarationSyntax.GetParent<ClassDeclarationSyntax>();
         var id = classDeclarationSyntax.Identifier.ToString();
 
         var accessibility = classDeclarationSyntax.Modifiers.First().ValueText switch
@@ -66,6 +61,7 @@ class DeclarationsAggregate : ISyntaxReceiver
 
         var statik = classDeclarationSyntax.Modifiers.Any(x => x.ValueText == "static");
 
+        var parent = classDeclarationSyntax.TryGetParent<ClassDeclarationSyntax>();
         return parent == null
             ? new(id, accessibility, null, statik)
             : new(id, accessibility, CaptureClassHierarchy(parent), statik);

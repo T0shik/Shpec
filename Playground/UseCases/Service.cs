@@ -11,11 +11,11 @@ public partial class Service : IUseCase
 
     public partial class Person
     {
-        [Schema] Schema _s = Schema.Define(
-            GenericProperties.FirstName,
-            GenericProperties.LastName,
-            GenericProperties.Age
-        );
+        _schema _s => _schema.declare(
+                Property.FirstName,
+                Property.LastName,
+                Property.Age
+            );
 
         public string FullName => FirstName + " " + LastName;
         public string Introduce => $"Hello, my name is {FirstName} and I am {Age} year's old.";

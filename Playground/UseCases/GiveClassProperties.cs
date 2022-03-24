@@ -4,19 +4,15 @@ namespace Playground.UseCases;
 
 internal partial class GiveClassProperties : IUseCase
 {
-    [Schema] Schema _p = Schema.Define(
-        GenericProperties.FirstName,
-        GenericProperties.LastName,
-        GenericProperties.Age
+    _schema _p =>
+        _schema.declare(
+            Property.FirstName,
+            Property.LastName,
+            Property.Age
         );
 
     public void Execute()
     {
-        var a = new GiveClassProperties
-        {
-            FirstName = "foo",
-            LastName = "bar",
-            Age = 55
-        };
+        var a = new GiveClassProperties { FirstName = "foo", LastName = "bar", Age = 55 };
     }
 }
