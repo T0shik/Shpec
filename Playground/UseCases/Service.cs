@@ -24,6 +24,7 @@ public partial class Service : IUseCase
 
     public void Do(Person person)
     {
+        Console.WriteLine(person.BirthYear);
         Console.WriteLine(person.FullName);
         //Console.WriteLine(person.Introduce);
         //Console.WriteLine(person.Initials);
