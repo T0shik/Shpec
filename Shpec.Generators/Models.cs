@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace Shpec.Generators;
 
 record PropertyDefinition(string Identifier, SyntaxKind Type);
-record ComputedPropertyDefinition(string Identifier, SyntaxKind Type, ExpressionSyntax Expression, bool Lambda);
+record ComputedPropertyDefinition(string Identifier, SyntaxKind Type, ExpressionSyntax Expression);
 
 record Declaration(string Namespace, ClassDeclaration Class, IEnumerable<string> Members);
 record ClassDeclaration(
@@ -16,7 +16,7 @@ record ClassDeclaration(
 
 record Seed;
 record PropertySeed(string Identifier, SyntaxKind Type) : Seed;
-record ComputedPropertySeed(string Identifier, SyntaxKind Type, ExpressionSyntax Expression, bool Lambda) : Seed;
+record ComputedPropertySeed(string Identifier, SyntaxKind Type, ExpressionSyntax Expression) : Seed;
 
 record ClassSeed(string Identifier, SyntaxKind Accessibility, ClassSeed? Parent) : Seed
 {

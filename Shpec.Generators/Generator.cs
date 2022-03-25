@@ -1,5 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using Shpec.Generators.Generators;
+using Shpec.Generators.Transforms;
 
 namespace Shpec.Generators;
 
@@ -38,8 +39,12 @@ public class SchemaGenerator : ISourceGenerator
                             var computedDefinition = computedProperties.FirstOrDefault(d => d.Identifier == x);
                             if (computedDefinition != null)
                             {
-                                var (identifier, syntaxKind, exp, lambda) = computedDefinition;
-                                return new ComputedPropertySeed(identifier, syntaxKind, exp, lambda);
+                                var (identifier, syntaxKind, exp) = computedDefinition;
+                                return new ComputedPropertySeed(
+                                    identifier,
+                                    syntaxKind,
+                                    new TransformComputedPropertyExpression(properties).Transform(exp)
+                                );
                             }
 
                             throw new Exception($"Failed to find definition for {x} of {declaration.Class.Identifier}");

@@ -15,6 +15,7 @@ public partial class Service : IUseCase
                 Property.FirstName,
                 Property.LastName,
                 Property.Age,
+                Computed.BirthYear,
                 Computed.FullName
                 //Computed.Introduce,
                 //Computed.Initials

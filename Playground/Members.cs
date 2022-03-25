@@ -13,6 +13,7 @@ public static class Property
 
 public class Computed
 {
+    public static int BirthYear => new _computed(DateTime.UtcNow.Year - Property.Age);
     public static string FullName => new _computed($"{Property.FirstName} {Property.LastName}");
     //public static string Introduce => new _computed(() => $"Hello, my name is {Property.FirstName} and I am {Property.Age} year's old.");
     //public static string Initials => new _computed(() =>

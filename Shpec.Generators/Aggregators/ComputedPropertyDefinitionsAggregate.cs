@@ -30,9 +30,7 @@ class ComputedPropertyDefinitionsAggregate : ISyntaxReceiver
         }
         var type = predefinedTypeSyntax.Keyword.Kind();
         var argument = objectCreationExpressionSyntax.ArgumentList.Arguments.First();
-        var expression = argument.Expression;
-        var lambda = argument.Expression is ParenthesizedExpressionSyntax;
 
-        Definitions.Add(new ComputedPropertyDefinition(identifier, type, expression, lambda));
+        Definitions.Add(new ComputedPropertyDefinition(identifier, type, argument.Expression));
     }
 }
