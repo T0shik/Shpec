@@ -11,7 +11,7 @@ public partial class Service : IUseCase
 
     public partial class Person
     {
-        _schema _s => _schema.declare(
+        _schema _s => _schema.define(
                 Property.FirstName,
                 Property.LastName,
                 Property.Age,

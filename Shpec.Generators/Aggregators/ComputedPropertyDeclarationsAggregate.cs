@@ -4,9 +4,9 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Shpec.Generators.Generators;
 
-class ComputedPropertyDefinitionsAggregate : ISyntaxReceiver
+class ComputedPropertyDeclarationsAggregate : ISyntaxReceiver
 {
-    public List<ComputedPropertyDefinition> Definitions { get; set; } = new();
+    public List<ComputedPropertyDefinition> Declarations { get; set; } = new();
 
     public void OnVisitSyntaxNode(SyntaxNode syntaxNode)
     {
@@ -31,6 +31,6 @@ class ComputedPropertyDefinitionsAggregate : ISyntaxReceiver
         var type = predefinedTypeSyntax.Keyword.Kind();
         var argument = objectCreationExpressionSyntax.ArgumentList.Arguments.First();
 
-        Definitions.Add(new ComputedPropertyDefinition(identifier, type, argument.Expression));
+        Declarations.Add(new ComputedPropertyDefinition(identifier, type, argument.Expression));
     }
 }

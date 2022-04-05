@@ -5,9 +5,9 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Shpec.Generators.Generators;
 
-class DeclarationsAggregate : ISyntaxReceiver
+class DefinitionsAggregate : ISyntaxReceiver
 {
-    public readonly Dictionary<string, Declaration> Declarations = new();
+    public readonly Dictionary<string, Declaration> Definitions = new();
 
     public void OnVisitSyntaxNode(SyntaxNode syntaxNode)
     {
@@ -16,7 +16,7 @@ class DeclarationsAggregate : ISyntaxReceiver
             return;
         }
 
-        if (!invocationExpressionSyntax.Expression.ToString().Equals("_schema.declare"))
+        if (!invocationExpressionSyntax.Expression.ToString().Equals("_schema.define"))
         {
             return;
         }
@@ -36,14 +36,14 @@ class DeclarationsAggregate : ISyntaxReceiver
         var clazz = CaptureClassHierarchy(classDeclaration);
 
         var key = $"{ns}.{clazz}";
-        if (Declarations.ContainsKey(key))
+        if (Definitions.ContainsKey(key))
         {
-            var d = Declarations[key];
-            Declarations[key] = d with { Members = d.Members.Concat(propertyNames) };
+            var d = Definitions[key];
+            Definitions[key] = d with { Members = d.Members.Concat(propertyNames) };
         }
         else
         {
-            Declarations[key] = new(ns, clazz, propertyNames);
+            Definitions[key] = new(ns, clazz, propertyNames);
         }
     }
 

@@ -22,5 +22,5 @@ public class _computed : _member{
 
 public class _schema
 {
-    public static _schema declare(params _member[] properties) => null;
+    public static _schema define(params _member[] properties) => null;
 }

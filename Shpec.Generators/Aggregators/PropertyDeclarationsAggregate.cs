@@ -4,9 +4,9 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Shpec.Generators.Generators;
 
-class PropertyDefinitionsAggregate : ISyntaxReceiver
+class PropertyDeclarationsAggregate : ISyntaxReceiver
 {
-    public List<PropertyDefinition> Definitions { get; set; } = new();
+    public List<PropertyDefinition> Declarations { get; set; } = new();
 
     public void OnVisitSyntaxNode(SyntaxNode syntaxNode)
     {
@@ -30,6 +30,6 @@ class PropertyDefinitionsAggregate : ISyntaxReceiver
         }
         var type = predefinedTypeSyntax.Keyword.Kind();
         
-        Definitions.Add(new PropertyDefinition(identifier, type));
+        Declarations.Add(new PropertyDefinition(identifier, type));
     }
 }

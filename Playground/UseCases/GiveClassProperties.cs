@@ -5,7 +5,7 @@ namespace Playground.UseCases;
 internal partial class GiveClassProperties : IUseCase
 {
     _schema _p =>
-        _schema.declare(
+        _schema.define(
             Property.FirstName,
             Property.LastName,
             Property.Age

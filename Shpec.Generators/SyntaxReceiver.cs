@@ -7,15 +7,15 @@ class SyntaxReceiver : ISyntaxReceiver
 {
     public SyntaxReceiver()
     {
-        PropertyDefinitions = new();
-        ComputedPropertyDefinitions = new();
-        DeclarationsAggregate = new();
+        propertyDeclarations = new();
+        computedPropertyDeclarations = new();
+        definitionsAggregate = new();
 
         _syntaxGenerators = new ISyntaxReceiver[] 
         {
-            PropertyDefinitions,
-            ComputedPropertyDefinitions,
-            DeclarationsAggregate,
+            propertyDeclarations,
+            computedPropertyDeclarations,
+            definitionsAggregate,
         };
     }
 
@@ -29,8 +29,8 @@ class SyntaxReceiver : ISyntaxReceiver
         }
     }
 
-    public PropertyDefinitionsAggregate PropertyDefinitions { get; }
-    public ComputedPropertyDefinitionsAggregate ComputedPropertyDefinitions { get; }
-    public DeclarationsAggregate DeclarationsAggregate { get; }
-    public List<Declaration> Declarations => DeclarationsAggregate.Declarations.Values.ToList();
+    public PropertyDeclarationsAggregate propertyDeclarations { get; }
+    public ComputedPropertyDeclarationsAggregate computedPropertyDeclarations { get; }
+    public DefinitionsAggregate definitionsAggregate { get; }
+    public List<Declaration> Declarations => definitionsAggregate.Definitions.Values.ToList();
 }

@@ -14,8 +14,8 @@ public class SchemaGenerator : ISourceGenerator
             throw new ArgumentNullException(nameof(SyntaxReceiver));
         }
 
-        var properties = syntaxReceiver.PropertyDefinitions.Definitions;
-        var computedProperties = syntaxReceiver.ComputedPropertyDefinitions.Definitions;
+        var properties = syntaxReceiver.propertyDeclarations.Declarations;
+        var computedProperties = syntaxReceiver.computedPropertyDeclarations.Declarations;
         foreach (var declaration in syntaxReceiver.Declarations)
         {
             NamespaceSeed ns = new(
