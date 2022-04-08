@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis.Text;
 using Shpec.Generators.SyntaxTemplates;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Shpec.Generators.Generators;
+namespace Shpec.Generators;
 
 class SchemaClassGenerator
 {

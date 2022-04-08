@@ -1,7 +1,7 @@
-﻿using System.Collections.Immutable;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
+using Shpec.Generators.Aggregators;
 
-namespace Shpec.Generators.Generators;
+namespace Shpec.Generators;
 
 class SyntaxReceiver : ISyntaxReceiver
 {

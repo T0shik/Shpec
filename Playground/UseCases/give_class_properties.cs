@@ -2,10 +2,10 @@
 
 namespace Playground.UseCases;
 
-internal partial class GiveClassProperties : IUseCase
+public partial class give_class_properties : IUseCase
 {
-    _schema _p =>
-        _schema.define(
+    _s _p =>
+        _s.define(
             Property.FirstName,
             Property.LastName,
             Property.Age
@@ -13,6 +13,6 @@ internal partial class GiveClassProperties : IUseCase
 
     public void Execute()
     {
-        var a = new GiveClassProperties { FirstName = "foo", LastName = "bar", Age = 55 };
+        var a = new give_class_properties { FirstName = "foo", LastName = "bar", Age = 55 };
     }
 }

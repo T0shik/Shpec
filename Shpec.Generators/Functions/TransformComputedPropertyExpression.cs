@@ -1,17 +1,16 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
+﻿using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Shpec.Generators.Transforms;
+namespace Shpec.Generators.Functions;
 
 internal class TransformComputedPropertyExpression
 {
-    private readonly List<PropertyDefinition> propertyDefinitions;
+    private readonly List<PropertyDefinition> _propertyDefinitions;
 
     public TransformComputedPropertyExpression(List<PropertyDefinition> propertyDefinitions)
     {
-        this.propertyDefinitions = propertyDefinitions;
+        _propertyDefinitions = propertyDefinitions;
     }
 
     public ExpressionSyntax Transform(ExpressionSyntax exp) => exp switch
@@ -30,7 +29,7 @@ internal class TransformComputedPropertyExpression
     {
         var property = exp.Kind() switch
         {
-            SyntaxKind.SimpleMemberAccessExpression => propertyDefinitions.FirstOrDefault(p => p.Identifier.ToString() == exp.Name.ToString()),
+            SyntaxKind.SimpleMemberAccessExpression => _propertyDefinitions.FirstOrDefault(p => p.Identifier.ToString() == exp.Name.ToString()),
             _ => throw new NotImplementedException("TransformComputedPropertyExpression BinaryExpressionSyntax GetKnownProperty unsupported MemberAccessExpressionSyntax kind.")
         };
 

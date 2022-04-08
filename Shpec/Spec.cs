@@ -20,7 +20,7 @@ public class _computed : _member{
     }
 }
 
-public class _schema
+public class _s
 {
-    public static _schema define(params _member[] properties) => null;
+    public static _s define(params _member[] properties) => null;
 }

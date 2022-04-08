@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Shpec.Generators.Generators;
+namespace Shpec.Generators.Aggregators;
 
 class DefinitionsAggregate : ISyntaxReceiver
 {
@@ -16,7 +16,7 @@ class DefinitionsAggregate : ISyntaxReceiver
             return;
         }
 
-        if (!invocationExpressionSyntax.Expression.ToString().Equals("_schema.define"))
+        if (!invocationExpressionSyntax.Expression.ToString().Equals("_s.define"))
         {
             return;
         }

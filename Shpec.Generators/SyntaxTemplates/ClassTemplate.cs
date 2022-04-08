@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis.CSharp;
+﻿using System.Security.Cryptography.X509Certificates;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -29,17 +30,26 @@ class ClassTemplate
             classTokens = classTokens.Append(Token(SyntaxKind.StaticKeyword));
         }
 
-        var members = seed.Members.Select(x => x switch
-        {
-            PropertySeed ps => PropertyTemplate.Create(ps),
-            ComputedPropertySeed cps => ComputedPropertyTemplate.Create(cps),
-            ClassSeed cs => Create(cs),
-            _ => throw new NotImplementedException("Unhandled Seed."),
-        });
+        List<MemberDeclarationSyntax> members = new();
+
+        members.AddRange(
+            seed.Members.Select(x => x switch
+            {
+                PropertySeed ps => PropertyTemplate.Create(ps),
+                ComputedPropertySeed cps => ComputedPropertyTemplate.Create(cps),
+                ClassSeed cs => Create(cs),
+                _ => throw new NotImplementedException("Unhandled Seed."),
+            })
+        );
 
         if (child != null)
         {
-            members = members.Append(child);
+            members.Add(child);
+        }
+
+        foreach (var conversion in seed.Conversions)
+        {
+            members.Add(ConversionOperatorTemplate.Create(conversion));
         }
 
         return ClassDeclaration(seed.Identifier)

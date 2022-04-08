@@ -2,16 +2,16 @@
 
 namespace Playground.UseCases;
 
-public partial class Service : IUseCase
+public partial class nested_classes_support : IUseCase
 {
     public void Execute()
     {
-        new Service().Do(new() { FirstName = "Foo", LastName = "Bar", Age = 10 });
+        new nested_classes_support().Do(new() { FirstName = "Foo", LastName = "Bar", Age = 10 });
     }
 
     public partial class Person
     {
-        _schema _s => _schema.define(
+        _s _s => _s.define(
                 Property.FirstName,
                 Property.LastName,
                 Property.Age,

@@ -2,7 +2,7 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Shpec.Generators.Generators;
+namespace Shpec.Generators.Aggregators;
 
 class PropertyDeclarationsAggregate : ISyntaxReceiver
 {
