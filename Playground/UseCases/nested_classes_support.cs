@@ -17,8 +17,6 @@ public partial class nested_classes_support : IUseCase
                 Property.Age,
                 Computed.BirthYear,
                 Computed.FullName
-                //Computed.Introduce,
-                //Computed.Initials
             );
     }
 
@@ -26,7 +24,5 @@ public partial class nested_classes_support : IUseCase
     {
         Console.WriteLine(person.BirthYear);
         Console.WriteLine(person.FullName);
-        //Console.WriteLine(person.Introduce);
-        //Console.WriteLine(person.Initials);
     }
 }

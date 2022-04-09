@@ -18,6 +18,10 @@ public class _computed : _member{
     {
 
     }
+
+    public string M => {
+        return "";
+    }
 }
 
 public class _s

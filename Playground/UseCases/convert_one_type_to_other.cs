@@ -4,11 +4,6 @@ namespace Playground.UseCases;
 
 public partial class convert_one_type_to_other : IUseCase
 {
-    public static implicit operator convert_one_type_to_other(PersonTwo t)
-    {
-        return new();
-    }
-
     public partial class PersonOne
     {
         _s _p => _s.define(
@@ -16,7 +11,6 @@ public partial class convert_one_type_to_other : IUseCase
             Property.LastName,
             Property.Age
         );
-
     }
 
     public partial class PersonTwo
