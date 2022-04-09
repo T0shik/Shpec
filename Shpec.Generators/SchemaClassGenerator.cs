@@ -30,7 +30,8 @@ class SchemaClassGenerator
         var cc = _seed.Clazz;
         while (cc != null)
         {
-            sb.Insert(i, cc.Identifier);
+            sb.Insert(i, '.');
+            sb.Insert(i + 1, cc.Identifier);
             cc = cc.Parent;
         }
 

@@ -14,15 +14,12 @@ public partial class nested_classes_support : IUseCase
         _s _s => _s.define(
                 Property.FirstName,
                 Property.LastName,
-                Property.Age,
-                Computed.BirthYear,
-                Computed.FullName
+                Property.Age
             );
     }
 
     public void Do(Person person)
     {
-        Console.WriteLine(person.BirthYear);
-        Console.WriteLine(person.FullName);
+        Console.WriteLine(person.FirstName + " " + person.LastName + " " + person.Age);
     }
 }

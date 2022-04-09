@@ -17,14 +17,14 @@ public partial class convert_one_type_to_other : IUseCase
     {
         _s _p => _s.define(
             Property.FirstName,
-            Property.LastName,
-            Computed.FullName
+            Property.LastName
+            //Computed.FullName
         );
     }
 
     public void Execute()
     {
         PersonTwo two = new PersonOne() { FirstName = "First", LastName = "Last", Age = 10 };
-        Console.WriteLine(two.FullName);
+        //Console.WriteLine(two.FullName);
     }
 }

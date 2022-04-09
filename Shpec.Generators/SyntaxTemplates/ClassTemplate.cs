@@ -33,11 +33,11 @@ class ClassTemplate
         List<MemberDeclarationSyntax> members = new();
 
         members.AddRange(
-            seed.Members.Select(x => x switch
+            seed.Members.SelectMany(x => x switch
             {
-                PropertySeed ps => PropertyTemplate.Create(ps),
+                PropertySeed ps => new() { PropertyTemplate.Create(ps) },
                 ComputedPropertySeed cps => ComputedPropertyTemplate.Create(cps),
-                ClassSeed cs => Create(cs),
+                ClassSeed cs => new() { Create(cs) },
                 _ => throw new NotImplementedException("Unhandled Seed."),
             })
         );

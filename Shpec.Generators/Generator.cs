@@ -18,7 +18,8 @@ public class SchemaGenerator : ISourceGenerator
         var computedProperties = syntaxReceiver.computedPropertyDeclarations.Declarations;
         
         var addImplicitConversions = new AddImplicitConversion(propertyDefinitions);
-        var transformComputedPropertyExpression = new TransformComputedPropertyExpression(propertyDefinitions);
+        var transformFactory = new TransformFactory(propertyDefinitions);
+        var transformComputedPropertyExpression = transformFactory.TransformComputedPropertyExpression();
 
         var namespaceSeeds = syntaxReceiver.Declarations.Select(declaration => new NamespaceSeed(
             declaration.Namespace,
