@@ -21,18 +21,21 @@ internal class AddImplicitConversion
             return target;
         }
 
-        var propSeeds = _propertyDefinitions
-            .Where(x => commonProperties.Contains(x.Identifier))
-            .Select(x => new PropertySeed(x.Identifier, x.Type))
-            .ToList()
-            .AsReadOnly();
+        IReadOnlyCollection<string> propSeeds;
 
+        propSeeds = _propertyDefinitions
+        .Where(x => commonProperties.Contains(x.Identifier))
+        .Select(x => x.Identifier)
+        .ToList()
+        .AsReadOnly();
 
         return target with
         {
             Clazz = target.Clazz with
             {
-                Conversions = new(target.Clazz.Conversions.Append(new(target, from, propSeeds)).ToList()),
+                Conversions = ImmutableArray<ConversionSeed>.Empty
+                       .AddRange(target.Clazz.Conversions)
+                       .Add(new(target, from, propSeeds)),
             }
         };
     }

@@ -16,7 +16,7 @@ static class ConversionOperatorTemplate
     private static string GetClassIdentifier(ClassSeed seed) =>
         seed.Parent == null
             ? seed.Identifier
-            : $"{(GetClassIdentifier(seed.Parent))}.{seed.Identifier}";
+            : $"{GetClassIdentifier(seed.Parent)}.{seed.Identifier}";
 
 
     public static ConversionOperatorDeclarationSyntax Create(ConversionSeed seed)
@@ -36,7 +36,7 @@ static class ConversionOperatorTemplate
                                     .WithArgumentList(ArgumentList()))))))
         };
 
-        foreach (var (identifier, _) in properties)
+        foreach (var identifier in properties)
         {
             blockStatements.Add(CreateAssignmentExpression(identifier));
         }

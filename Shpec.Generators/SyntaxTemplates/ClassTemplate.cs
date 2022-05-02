@@ -1,5 +1,4 @@
-﻿using System.Security.Cryptography.X509Certificates;
-using Microsoft.CodeAnalysis.CSharp;
+﻿using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -35,8 +34,8 @@ class ClassTemplate
         members.AddRange(
             seed.Members.SelectMany(x => x switch
             {
-                PropertySeed ps => new() { PropertyTemplate.Create(ps) },
                 ComputedPropertySeed cps => ComputedPropertyTemplate.Create(cps),
+                PropertySeed ps => new() { PropertyTemplate.Create(ps) },
                 ClassSeed cs => new() { Create(cs) },
                 _ => throw new NotImplementedException("Unhandled Seed."),
             })
@@ -52,8 +51,36 @@ class ClassTemplate
             members.Add(ConversionOperatorTemplate.Create(conversion));
         }
 
+        var validationMember = CreateValidationMember(seed);
+        if (validationMember != null)
+        {
+            members.Add(validationMember);
+        }
+
         return ClassDeclaration(seed.Identifier)
             .WithModifiers(TokenList(classTokens))
             .WithMembers(List(members));
+    }
+
+    public static MemberDeclarationSyntax? CreateValidationMember(ClassSeed classSeed)
+    {
+        List<PropertySeed> properties = new();
+
+
+        foreach(var m in classSeed.Members)
+        {
+            if(m is PropertySeed ps)
+            {
+                properties.Add(ps);
+            }
+        }
+        
+
+        if (properties.Count == 0)
+        {
+            return null;
+        }
+
+        return ValidationMethodTemplate.Create(properties.AsReadOnly());
     }
 }

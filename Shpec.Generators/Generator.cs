@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Immutable;
+using System.Collections.ObjectModel;
 using Microsoft.CodeAnalysis;
 using Shpec.Generators.Functions;
 
@@ -16,7 +17,7 @@ public class SchemaGenerator : ISourceGenerator
 
         var propertyDefinitions = syntaxReceiver.propertyDeclarations.Declarations;
         var computedProperties = syntaxReceiver.computedPropertyDeclarations.Declarations;
-        
+
         var addImplicitConversions = new AddImplicitConversion(propertyDefinitions);
         var transformFactory = new TransformFactory(propertyDefinitions);
         var transformComputedPropertyExpression = transformFactory.TransformComputedPropertyExpression();
@@ -32,45 +33,55 @@ public class SchemaGenerator : ISourceGenerator
                         var propertyDefinition = propertyDefinitions.FirstOrDefault(d => d.Identifier == x);
                         if (propertyDefinition != null)
                         {
-                            var (identifier, syntaxKind) = propertyDefinition;
-                            return new PropertySeed(identifier, syntaxKind);
+                            var (identifier, syntaxKind, validation) = propertyDefinition;
+
+                            var validationSeed = MapValidation.Map(validation);
+
+                            return new PropertySeed(identifier, syntaxKind, validationSeed);
                         }
 
                         var computedDefinition = computedProperties.FirstOrDefault(d => d.Identifier == x);
                         if (computedDefinition != null)
                         {
-                            var (identifier, syntaxKind, exp) = computedDefinition;
+                            var (identifier, syntaxKind, validation, exp) = computedDefinition;
+
+                            var validationSeed = MapValidation.Map(validation);
+
                             return new ComputedPropertySeed(
                                 identifier,
                                 syntaxKind,
+                                validationSeed,
                                 transformComputedPropertyExpression.Transform(exp)
                             );
                         }
 
-                        throw new($"Failed to find definition for {x} of {declaration.Class.Identifier}");
+                        throw new($"Failed to find declaration for {x} of {declaration.Class.Identifier}");
                     })
                     .ToList()
                     .AsReadOnly(),
-                new(ArraySegment<ConversionSeed>.Empty),
+                ImmutableArray<ConversionSeed>.Empty,
                 declaration.Class.Static
             )
         )).ToList().AsReadOnly();
 
-
-        namespaceSeeds = namespaceSeeds.Select((ns, i) =>
-        {
-            for (var j = 0; j < namespaceSeeds.Count; j++)
+        namespaceSeeds = namespaceSeeds
+            .Select((ns, i) =>
             {
-                if (i == j)
+                for (var j = 0; j < namespaceSeeds.Count; j++)
                 {
-                    continue;
+                    if (i == j)
+                    {
+                        continue;
+                    }
+
+                    ns = addImplicitConversions.To(ns, namespaceSeeds[j]);
                 }
 
-                ns = addImplicitConversions.To(ns, namespaceSeeds[j]);
-            }
+                return ns;
+            })
+            .ToList()
+            .AsReadOnly();
 
-            return ns;
-        }).ToList().AsReadOnly();
 
         foreach (var classGen in namespaceSeeds.Select(x => new SchemaClassGenerator(x)))
         {
@@ -86,8 +97,8 @@ public class SchemaGenerator : ISourceGenerator
                 parent.Identifier,
                 parent.Accessibility,
                 BuildParents(parent.Parent),
-                new(ArraySegment<Seed>.Empty),
-                new(ArraySegment<ConversionSeed>.Empty),
+                ImmutableArray<Seed>.Empty,
+                ImmutableArray<ConversionSeed>.Empty,
                 parent.Static
             );
     }

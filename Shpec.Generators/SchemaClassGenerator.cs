@@ -16,6 +16,7 @@ class SchemaClassGenerator
     }
 
     internal SourceText Source => CompilationUnit()
+        .WithUsings(SingletonList(UsingDirective(IdentifierName("Shpec"))))
         .WithMembers(SingletonList(NamespaceTemplate.Create(_seed)))
         .NormalizeWhitespace()
         .GetText(Encoding.UTF8);

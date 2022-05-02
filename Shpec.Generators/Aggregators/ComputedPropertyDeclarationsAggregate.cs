@@ -1,6 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Immutable;
 
 namespace Shpec.Generators.Aggregators;
 
@@ -24,13 +25,20 @@ class ComputedPropertyDeclarationsAggregate : ISyntaxReceiver
             .GetParent<PropertyDeclarationSyntax>();
 
         var identifier = propertyDeclarationSyntax.Identifier.ToString();
-        if(propertyDeclarationSyntax.Type is not PredefinedTypeSyntax predefinedTypeSyntax)
+        if (propertyDeclarationSyntax.Type is not PredefinedTypeSyntax predefinedTypeSyntax)
         {
             throw new Exception($"Error:\n{propertyDeclarationSyntax.GetText()}");
         }
         var type = predefinedTypeSyntax.Keyword.Kind();
         var argument = objectCreationExpressionSyntax.ArgumentList.Arguments.First();
 
-        Declarations.Add(new ComputedPropertyDefinition(identifier, type, argument.Expression));
+        Declarations.Add(
+            new ComputedPropertyDefinition(
+                identifier,
+                type,
+                ImmutableArray<BaseValidation>.Empty,
+                argument.Expression
+            )
+        );
     }
 }
