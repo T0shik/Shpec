@@ -83,7 +83,7 @@ class PropertyDeclarationsAggregate : ISyntaxReceiver
             .GetParent<PropertyDeclarationSyntax>();
 
         var identifier = propertyDeclarationSyntax.Identifier.ToString();
-        var typeKind = predefinedTypeSyntax.Kind();
+        var typeKind = predefinedTypeSyntax.Keyword.Kind();
 
         Declarations.Add(new PropertyDefinition(identifier, typeKind, validation.AsReadOnly()));
     }

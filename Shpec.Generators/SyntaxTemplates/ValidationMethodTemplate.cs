@@ -66,9 +66,7 @@ internal class ValidationMethodTemplate
                                                         Argument(
                                                             LiteralExpression(
                                                                 SyntaxKind.StringLiteralExpression,
-                                                                Literal("todo: Some Error")))}))))))))
-                    .WithSemicolonToken(
-                        MissingToken(SyntaxKind.SemicolonToken)))));
+                                                                Literal("todo: Some Error")))})))))))))));
     }
 
     public static LocalDeclarationStatementSyntax CreateResultsDeclaration()

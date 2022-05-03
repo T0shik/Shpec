@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using Microsoft.CodeAnalysis;
 using Shpec.Generators.Functions;
+using static Shpec.Generators.Utils.Ops;
 
 namespace Shpec.Generators;
 
@@ -85,7 +86,7 @@ public class SchemaGenerator : ISourceGenerator
 
         foreach (var classGen in namespaceSeeds.Select(x => new SchemaClassGenerator(x)))
         {
-            context.AddSource(classGen.SourceName, classGen.Source);
+            Try(() => context.AddSource(classGen.SourceName, classGen.Source), $"generating source for {classGen.SourceName}");
         }
     }
 
