@@ -8,9 +8,16 @@ public class simple_validation : IUseCase
     public void Execute()
     {
         var e = new SomeEntity() { FirstName = "Foo", NumericIdentifier = 0 };
-        if (e.Valid())
+        var validationResult = e.Valid();
+        if (validationResult)
         {
             throw new Exception("this ain't working");
+        }
+
+        Console.WriteLine($"--Validation Erros-- {validationResult}");
+        foreach (var error in validationResult.Errors)
+        {
+            Console.WriteLine($"Validation Error: {error}");
         }
     }
 }

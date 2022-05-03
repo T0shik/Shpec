@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using Shpec.Generators.SyntaxTemplates;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -16,7 +17,17 @@ class SchemaClassGenerator
     }
 
     internal SourceText Source => CompilationUnit()
-        .WithUsings(SingletonList(UsingDirective(IdentifierName("Shpec"))))
+        .WithUsings(
+                List<UsingDirectiveSyntax>(
+                    new UsingDirectiveSyntax[]{
+                        UsingDirective(
+                            QualifiedName(
+                                QualifiedName(
+                                    IdentifierName("System"),
+                                    IdentifierName("Collections")),
+                                IdentifierName("Immutable"))),
+                        UsingDirective(
+                            IdentifierName("Shpec"))}))
         .WithMembers(SingletonList(NamespaceTemplate.Create(_seed)))
         .NormalizeWhitespace()
         .GetText(Encoding.UTF8);

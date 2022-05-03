@@ -1,8 +1,10 @@
-﻿namespace Shpec;
+﻿using System.Collections.Immutable;
 
-public record struct ValidationResult(IReadOnlyList<ValidationError> Errors)
+namespace Shpec;
+
+public record struct ValidationResult(ImmutableArray<ValidationError> Errors)
 {
-    public bool Success => Errors.Count > 0;
+    public bool Success => Errors.Length == 0;
 
     public static implicit operator bool(ValidationResult v) => v.Success;
 }

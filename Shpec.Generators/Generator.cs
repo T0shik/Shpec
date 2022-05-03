@@ -16,11 +16,11 @@ public class SchemaGenerator : ISourceGenerator
             throw new ArgumentNullException(nameof(SyntaxReceiver));
         }
 
-        var propertyDefinitions = syntaxReceiver.propertyDeclarations.Declarations;
+        var propertyDeclarations = syntaxReceiver.propertyDeclarations.Declarations;
         var computedProperties = syntaxReceiver.computedPropertyDeclarations.Declarations;
 
-        var addImplicitConversions = new AddImplicitConversion(propertyDefinitions);
-        var transformFactory = new TransformFactory(propertyDefinitions);
+        var addImplicitConversions = new AddImplicitConversion(propertyDeclarations);
+        var transformFactory = new TransformFactory(propertyDeclarations);
         var transformComputedPropertyExpression = transformFactory.TransformComputedPropertyExpression();
 
         var namespaceSeeds = syntaxReceiver.Declarations.Select(declaration => new NamespaceSeed(
@@ -31,7 +31,7 @@ public class SchemaGenerator : ISourceGenerator
                 BuildParents(declaration.Class.Parent),
                 declaration.Members.Select<string, Seed>(x =>
                     {
-                        var propertyDefinition = propertyDefinitions.FirstOrDefault(d => d.Identifier == x);
+                        var propertyDefinition = propertyDeclarations.FirstOrDefault(d => d.Identifier == x);
                         if (propertyDefinition != null)
                         {
                             var (identifier, syntaxKind, validation) = propertyDefinition;

@@ -67,14 +67,14 @@ class ClassTemplate
         List<PropertySeed> properties = new();
 
 
-        foreach(var m in classSeed.Members)
+        foreach (var m in classSeed.Members)
         {
-            if(m is PropertySeed ps)
+            if (m is PropertySeed { Validations: { Count: > 0 } } ps)
             {
                 properties.Add(ps);
             }
         }
-        
+
 
         if (properties.Count == 0)
         {
