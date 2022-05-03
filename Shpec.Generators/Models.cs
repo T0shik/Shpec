@@ -23,7 +23,7 @@ record ClassDeclaration(
 record Seed;
 record ValidationSeed;
 record KnownValidation(string identifier) : ValidationSeed;
-record AdHocValidationSeed(ExpressionSyntax exp) : ValidationSeed;
+record AdHocValidationSeed(ExpressionSyntax Expression) : ValidationSeed;
 
 record PropertySeed(string Identifier, SyntaxKind Type, IReadOnlyCollection<ValidationSeed> Validations) : Seed;
 
