@@ -4,12 +4,11 @@ namespace Playground.UseCases;
 
 public partial class give_class_properties : IUseCase
 {
-    _s _p =>
-        _s.define(
-            Property.FirstName,
-            Property.LastName,
-            Property.Age
-        );
+    Properties _p => new(
+        Property.FirstName,
+        Property.LastName,
+        Property.Age
+    );
 
     public void Execute()
     {

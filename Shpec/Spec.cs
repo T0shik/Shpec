@@ -2,36 +2,36 @@
 
 namespace Shpec;
 
-public class _member
+public partial class Member
 {
-    public static readonly _member _default = new();
-    public static implicit operator _member(string v) => _default;
-    public static implicit operator string(_member p) => "";
-    public static implicit operator _member(int v) => _default;
-    public static implicit operator int(_member p) => 0;
+    public static readonly Member Default = new();
+    public static implicit operator string(Member p) => "";
+    public static implicit operator int(Member p) => 0;
 }
 
-public class _property : _member
+public static class Declare
 {
-    public _property() { }
+    public static Member _property() => Member.Default;
+    public static Property<T> _property<T>() => new();
+    public static Property<T> _property<T>(Func<T, bool> predicate) => new();
+    public static Member _computed(object o) => new();
+    public static Computed<T> _computed<T>(object o) => new();
 }
 
-public static class _property<T>
+public class Property<T> : Member
 {
     public static T must(Func<T, bool> predicate) => default;
 }
 
-public class _computed : _member
+public class Computed<T> : Property<T> { }
+
+public class Properties
 {
-    public _computed(object o) { }
+    public Properties(params object[] members) { }
 }
 
-public class _s
-{
-    public static _s define(params _member[] properties) => new();
-}
 public static class ValidationExtensions
 {
-    public static _member must<T>(this T _, Func<T, bool> predicate) => _member._default;
-    public static _member match<T>(string regex) => _member._default;
+    public static Member must<T>(this T _, Func<T, bool> predicate) => Member.Default;
+    public static Member match<T>(string regex) => Member.Default;
 }

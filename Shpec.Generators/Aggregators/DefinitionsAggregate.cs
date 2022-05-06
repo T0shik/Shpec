@@ -11,27 +11,15 @@ class DefinitionsAggregate : ISyntaxReceiver
 
     public void OnVisitSyntaxNode(SyntaxNode syntaxNode)
     {
-        if (syntaxNode is not InvocationExpressionSyntax invocationExpressionSyntax)
+        if (syntaxNode is not PropertyDeclarationSyntax { Type: IdentifierNameSyntax { Identifier.Text: "Properties" } } propertyDeclaration)
         {
             return;
         }
 
-        if (!invocationExpressionSyntax.Expression.ToString().Equals("_s.define"))
-        {
-            return;
-        }
+        var propertyNames = GetProperties(propertyDeclaration);
 
-        var propertyArguments = invocationExpressionSyntax.ArgumentList.Arguments.ToList();
-
-        if (propertyArguments is not { Count: > 0 })
-        {
-            return;
-        }
-
-        var namespaceDeclaration = invocationExpressionSyntax.GetParent<FileScopedNamespaceDeclarationSyntax>();
-        var classDeclaration = invocationExpressionSyntax.GetParent<ClassDeclarationSyntax>();
-        var propertyNames = propertyArguments.Select(x => x.Expression.ToString().Split('.').Last()).ToImmutableArray();
-
+        var namespaceDeclaration = propertyDeclaration.GetParent<FileScopedNamespaceDeclarationSyntax>();
+        var classDeclaration = propertyDeclaration.GetParent<ClassDeclarationSyntax>();
         var ns = namespaceDeclaration.Name.ToString();
         var clazz = CaptureClassHierarchy(classDeclaration);
 
@@ -45,6 +33,24 @@ class DefinitionsAggregate : ISyntaxReceiver
         {
             Definitions[key] = new(ns, clazz, propertyNames);
         }
+    }
+
+    private ImmutableArray<string> GetProperties(PropertyDeclarationSyntax propertyDeclaration)
+    {
+        if (propertyDeclaration.ExpressionBody == null)
+        {
+            throw new($"No expression body for properties in {propertyDeclaration.FullSpan}");
+        }
+
+        if (propertyDeclaration.ExpressionBody.Expression is ImplicitObjectCreationExpressionSyntax a)
+        {
+            return a.ArgumentList.Arguments
+                .Select(x => x.Expression.ToString().Split('.').Last())
+                .ToImmutableArray();
+        }
+
+
+        throw new($"Unknown Scenario {propertyDeclaration.FullSpan}");
     }
 
     private static ClassDeclaration CaptureClassHierarchy(ClassDeclarationSyntax classDeclarationSyntax)

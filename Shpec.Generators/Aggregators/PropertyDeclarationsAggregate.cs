@@ -12,24 +12,19 @@ class PropertyDeclarationsAggregate : ISyntaxReceiver
 
     public void OnVisitSyntaxNode(SyntaxNode syntaxNode)
     {
-        if (syntaxNode is ObjectCreationExpressionSyntax oces)
+        if (syntaxNode is InvocationExpressionSyntax { Expression: IdentifierNameSyntax { Identifier.Text: "_property" } } a)
         {
-            AddFrom(oces);
+            AddSimple(a);
         }
-        else if (syntaxNode is InvocationExpressionSyntax ies)
+        else if (syntaxNode is InvocationExpressionSyntax { Expression: MemberAccessExpressionSyntax } b)
         {
-            AddFrom(ies);
+            AddFrom(b);
         }
     }
 
-    private void AddFrom(ObjectCreationExpressionSyntax objectCreationExpressionSyntax)
+    private void AddSimple(InvocationExpressionSyntax invocationExpressionSyntax)
     {
-        if (!objectCreationExpressionSyntax.Type.GetText().ToString().Equals("_property"))
-        {
-            return;
-        }
-
-        var propertyDeclarationSyntax = objectCreationExpressionSyntax
+        var propertyDeclarationSyntax = invocationExpressionSyntax
             .GetParent<PropertyDeclarationSyntax>();
 
         var identifier = propertyDeclarationSyntax.Identifier.ToString();
@@ -37,6 +32,7 @@ class PropertyDeclarationsAggregate : ISyntaxReceiver
         {
             throw new Exception($"Error:\n{propertyDeclarationSyntax.GetText()}");
         }
+
         var type = predefinedTypeSyntax.Keyword.Kind();
 
         Declarations.Add(new PropertyDefinition(identifier, type, ImmutableArray<AdHocValidation>.Empty));
@@ -44,29 +40,36 @@ class PropertyDeclarationsAggregate : ISyntaxReceiver
 
     private void AddFrom(InvocationExpressionSyntax invocationExpressionSyntax)
     {
-        if (!invocationExpressionSyntax.Expression.GetText().ToString().StartsWith("_property"))
+        if (!invocationExpressionSyntax.GetText().ToString().StartsWith("_property"))
         {
             return;
         }
 
-        var memberAccessExpressionSyntax = invocationExpressionSyntax.Expression as MemberAccessExpressionSyntax;
-        if (memberAccessExpressionSyntax == null)
+        if (invocationExpressionSyntax.Expression is not MemberAccessExpressionSyntax maes)
         {
             throw new Exception("bastard");
         }
-        var gns = memberAccessExpressionSyntax.Expression as GenericNameSyntax;
-        if(gns == null)
+
+        if (maes.Expression is not InvocationExpressionSyntax ies)
         {
             throw new Exception("bastard 2");
         }
+
+        if (ies.Expression is not GenericNameSyntax gns)
+        {
+            throw new Exception("bastard 3");
+        }
+
         TypeSyntax typeSyntax;
         try
         {
             typeSyntax = gns.TypeArgumentList.Arguments.Single();
-        } catch
+        }
+        catch
         {
             throw new Exception($"{gns.TypeArgumentList.Arguments}");
         }
+
         if (typeSyntax is not PredefinedTypeSyntax predefinedTypeSyntax)
         {
             throw new Exception($"Error:\n{typeSyntax.GetText()}");

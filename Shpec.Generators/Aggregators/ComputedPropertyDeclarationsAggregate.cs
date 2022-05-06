@@ -11,17 +11,12 @@ class ComputedPropertyDeclarationsAggregate : ISyntaxReceiver
 
     public void OnVisitSyntaxNode(SyntaxNode syntaxNode)
     {
-        if (syntaxNode is not ObjectCreationExpressionSyntax objectCreationExpressionSyntax)
+        if (syntaxNode is not InvocationExpressionSyntax { Expression: IdentifierNameSyntax { Identifier.Text: "_computed" } } invocation)
         {
             return;
         }
 
-        if (!objectCreationExpressionSyntax.Type.GetText().ToString().Equals("_computed"))
-        {
-            return;
-        }
-
-        var propertyDeclarationSyntax = objectCreationExpressionSyntax
+        var propertyDeclarationSyntax = invocation
             .GetParent<PropertyDeclarationSyntax>();
 
         var identifier = propertyDeclarationSyntax.Identifier.ToString();
@@ -30,7 +25,7 @@ class ComputedPropertyDeclarationsAggregate : ISyntaxReceiver
             throw new Exception($"Error:\n{propertyDeclarationSyntax.GetText()}");
         }
         var type = predefinedTypeSyntax.Keyword.Kind();
-        var argument = objectCreationExpressionSyntax.ArgumentList.Arguments.First();
+        var argument = invocation.ArgumentList.Arguments.First();
 
         Declarations.Add(
             new ComputedPropertyDefinition(
@@ -41,4 +36,5 @@ class ComputedPropertyDeclarationsAggregate : ISyntaxReceiver
             )
         );
     }
+    
 }

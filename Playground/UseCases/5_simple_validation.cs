@@ -1,4 +1,5 @@
 ﻿using Shpec;
+using static Shpec.Declare;
 
 namespace Playground.UseCases;
 
@@ -42,7 +43,7 @@ public class simple_validation : IUseCase
 
 public partial class SomeEntity
 {
-    _s _s => _s.define(
+    Properties _p => new(
         ValidatedProperty.Positive,
         ValidatedProperty.Negative,
         ValidatedProperty.PositiveOrZero,
@@ -54,10 +55,10 @@ public partial class SomeEntity
 
 public static class ValidatedProperty
 {
-    public static int Positive => _property<int>.must(x => x > 0);
-    public static int Negative => _property<int>.must(x => x < 0);
-    public static int PositiveOrZero => _property<int>.must(x => x >= 0);
-    public static int NegativeOrZero => _property<int>.must(x => x <= 0);
-    public static int IsZero => _property<int>.must(_ => _ == 0);
-    public static int NotZero => _property<int>.must(_ => _ != 0);
+    public static int Positive => _property<int>().must(x => x > 0);
+    public static int Negative => _property<int>().must(x => x < 0);
+    public static int PositiveOrZero => _property<int>().must(x => x >= 0);
+    public static int NegativeOrZero => _property<int>().must(x => x <= 0);
+    public static int IsZero => _property<int>().must(_ => _ == 0);
+    public static int NotZero => _property<int>().must(_ => _ != 0);
 }
