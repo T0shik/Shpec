@@ -13,7 +13,7 @@ internal static class MapValidation
         {
             var seed = b switch
             {
-                AdHocValidation v => v.exp switch
+                AdHocValidation v => v.Exp switch
                 {
                     SimpleLambdaExpressionSyntax e => new AdHocValidationSeed(e),
                     _ => throw new Exception("unknwon adhoc declaration scenario")

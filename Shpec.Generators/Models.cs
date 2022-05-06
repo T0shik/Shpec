@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace Shpec.Generators;
 
 record BaseValidation;
-record AdHocValidation(SimpleLambdaExpressionSyntax exp) : BaseValidation;
+record AdHocValidation(SimpleLambdaExpressionSyntax Exp) : BaseValidation;
 record PropertyDefinition(string Identifier, SyntaxKind Type, IReadOnlyCollection<BaseValidation> Validation);
 
 record ComputedPropertyDefinition(string Identifier, SyntaxKind Type, IReadOnlyCollection<BaseValidation> Validation, ExpressionSyntax Expression);
@@ -22,7 +22,6 @@ record ClassDeclaration(
 
 record Seed;
 record ValidationSeed;
-record KnownValidation(string identifier) : ValidationSeed;
 record AdHocValidationSeed(ExpressionSyntax Expression) : ValidationSeed;
 
 record PropertySeed(string Identifier, SyntaxKind Type, IReadOnlyCollection<ValidationSeed> Validations) : Seed;
