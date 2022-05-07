@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Immutable;
+using Shpec.Generators.Utils;
 
 namespace Shpec.Generators.Aggregators;
 
@@ -22,9 +23,9 @@ class ComputedPropertyDeclarationsAggregate : ISyntaxReceiver
         var identifier = propertyDeclarationSyntax.Identifier.ToString();
         if (propertyDeclarationSyntax.Type is not PredefinedTypeSyntax predefinedTypeSyntax)
         {
-            throw new Exception($"Error:\n{propertyDeclarationSyntax.GetText()}");
+            throw new ShpecAggregationException("computed property is not predefined", syntaxNode);
         }
-        var type = predefinedTypeSyntax.Keyword.Kind();
+        var type = predefinedTypeSyntax.Keyword.Text;
         var argument = invocation.ArgumentList.Arguments.First();
 
         Declarations.Add(

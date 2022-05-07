@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
+using Shpec.Generators.Utils;
 
 namespace Shpec.Generators.Aggregators;
 
@@ -28,14 +29,20 @@ class PropertyDeclarationsAggregate : ISyntaxReceiver
             .GetParent<PropertyDeclarationSyntax>();
 
         var identifier = propertyDeclarationSyntax.Identifier.ToString();
-        if (propertyDeclarationSyntax.Type is not PredefinedTypeSyntax predefinedTypeSyntax)
+        if (propertyDeclarationSyntax.Type is PredefinedTypeSyntax predefinedTypeSyntax)
         {
-            throw new Exception($"Error:\n{propertyDeclarationSyntax.GetText()}");
+            var type = predefinedTypeSyntax.Keyword.Text;
+            Declarations.Add(new(identifier, type, ImmutableArray<AdHocValidation>.Empty));
         }
-
-        var type = predefinedTypeSyntax.Keyword.Kind();
-
-        Declarations.Add(new PropertyDefinition(identifier, type, ImmutableArray<AdHocValidation>.Empty));
+        else if (propertyDeclarationSyntax.Type is IdentifierNameSyntax identifierNameSyntax)
+        {
+            var type = identifierNameSyntax.Identifier.Text;
+            Declarations.Add(new(identifier, type, ImmutableArray<AdHocValidation>.Empty));
+        }
+        else
+        {
+            throw new ShpecAggregationException("unsupported property declaration", propertyDeclarationSyntax);
+        }
     }
 
     private void AddFrom(InvocationExpressionSyntax invocationExpressionSyntax)
@@ -47,17 +54,17 @@ class PropertyDeclarationsAggregate : ISyntaxReceiver
 
         if (invocationExpressionSyntax.Expression is not MemberAccessExpressionSyntax maes)
         {
-            throw new Exception("bastard");
+            throw new ShpecAggregationException("Probably declared your property incorrectly(1)", invocationExpressionSyntax);
         }
 
         if (maes.Expression is not InvocationExpressionSyntax ies)
         {
-            throw new Exception("bastard 2");
+            throw new ShpecAggregationException("Probably declared your property incorrectly(2)", invocationExpressionSyntax);
         }
 
         if (ies.Expression is not GenericNameSyntax gns)
         {
-            throw new Exception("bastard 3");
+            throw new ShpecAggregationException("Probably declared your property incorrectly(3)", invocationExpressionSyntax);
         }
 
         TypeSyntax typeSyntax;
@@ -72,7 +79,7 @@ class PropertyDeclarationsAggregate : ISyntaxReceiver
 
         if (typeSyntax is not PredefinedTypeSyntax predefinedTypeSyntax)
         {
-            throw new Exception($"Error:\n{typeSyntax.GetText()}");
+            throw new ShpecAggregationException("property is not pre-defined", invocationExpressionSyntax);
         }
 
         var validation = new List<BaseValidation>();
@@ -86,8 +93,8 @@ class PropertyDeclarationsAggregate : ISyntaxReceiver
             .GetParent<PropertyDeclarationSyntax>();
 
         var identifier = propertyDeclarationSyntax.Identifier.ToString();
-        var typeKind = predefinedTypeSyntax.Keyword.Kind();
+        var type = predefinedTypeSyntax.Keyword.Text;
 
-        Declarations.Add(new PropertyDefinition(identifier, typeKind, validation.AsReadOnly()));
+        Declarations.Add(new(identifier, type, validation.AsReadOnly()));
     }
 }

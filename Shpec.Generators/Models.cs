@@ -6,9 +6,9 @@ namespace Shpec.Generators;
 
 record BaseValidation;
 record AdHocValidation(SimpleLambdaExpressionSyntax Exp) : BaseValidation;
-record PropertyDefinition(string Identifier, SyntaxKind Type, IReadOnlyCollection<BaseValidation> Validation);
+record PropertyDefinition(string Identifier, string Type, IReadOnlyCollection<BaseValidation> Validation);
 
-record ComputedPropertyDefinition(string Identifier, SyntaxKind Type, IReadOnlyCollection<BaseValidation> Validation, ExpressionSyntax Expression);
+record ComputedPropertyDefinition(string Identifier, string Type, IReadOnlyCollection<BaseValidation> Validation, ExpressionSyntax Expression);
 
 record Declaration(string Namespace, ClassDeclaration Class, IEnumerable<string> Members);
 
@@ -24,9 +24,9 @@ record Seed;
 record ValidationSeed;
 record AdHocValidationSeed(ExpressionSyntax Expression) : ValidationSeed;
 
-record PropertySeed(string Identifier, SyntaxKind Type, IReadOnlyCollection<ValidationSeed> Validations) : Seed;
+record PropertySeed(string Identifier, string Type, IReadOnlyCollection<ValidationSeed> Validations) : Seed;
 
-record ComputedPropertySeed(string Identifier, SyntaxKind Type, IReadOnlyCollection<ValidationSeed> Validations, ExpressionSyntax Expression)
+record ComputedPropertySeed(string Identifier, string Type, IReadOnlyCollection<ValidationSeed> Validations, ExpressionSyntax Expression)
     : PropertySeed(Identifier, Type, Validations);
 
 record ConversionSeed(NamespaceSeed Target, NamespaceSeed From, IReadOnlyCollection<string> Properties);

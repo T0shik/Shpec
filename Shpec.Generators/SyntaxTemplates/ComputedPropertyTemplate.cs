@@ -20,7 +20,7 @@ class ComputedPropertyTemplate
     private static List<MemberDeclarationSyntax> ArrowExpressionMember(ComputedPropertySeed seed)
     {
         return new() {
-            PropertyDeclaration(PredefinedType(Token(seed.Type)), Identifier(seed.Identifier))
+            PropertyDeclaration(IdentifierName(seed.Type), Identifier(seed.Identifier))
                 .WithModifiers(TokenList(Token(SyntaxKind.PublicKeyword)))
                 .WithExpressionBody(ArrowExpressionClause(seed.Expression))
                 .WithSemicolonToken(Token(SyntaxKind.SemicolonToken))
@@ -32,12 +32,12 @@ class ComputedPropertyTemplate
         var functionId = $"__{seed.Identifier}";
         return new()
         {
-            PropertyDeclaration(PredefinedType(Token(seed.Type)), Identifier(seed.Identifier))
+            PropertyDeclaration(IdentifierName(seed.Type), Identifier(seed.Identifier))
                 .WithModifiers(TokenList(Token(SyntaxKind.PublicKeyword)))
                 .WithExpressionBody(ArrowExpressionClause(InvocationExpression(IdentifierName(functionId))))
                 .WithSemicolonToken(Token(SyntaxKind.SemicolonToken)),
 
-            MethodDeclaration(PredefinedType(Token(seed.Type)), Identifier(functionId))
+            MethodDeclaration(IdentifierName(seed.Type), Identifier(functionId))
                 .WithModifiers(TokenList(Token(SyntaxKind.PrivateKeyword)))
                 .WithBody(exp.Block)
         };

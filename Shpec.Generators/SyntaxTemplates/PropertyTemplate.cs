@@ -9,27 +9,26 @@ class PropertyTemplate
 {
     public static MemberDeclarationSyntax Create(PropertySeed seed)
     {
-        var propertyType = seed.Type.Assert(
-            SyntaxKind.BoolKeyword,
-            SyntaxKind.ByteKeyword,
-            SyntaxKind.SByteKeyword,
-            SyntaxKind.ShortKeyword,
-            SyntaxKind.UShortKeyword,
-            SyntaxKind.IntKeyword,
-            SyntaxKind.UIntKeyword,
-            SyntaxKind.LongKeyword,
-            SyntaxKind.ULongKeyword,
-            SyntaxKind.DoubleKeyword,
-            SyntaxKind.FloatKeyword,
-            SyntaxKind.DecimalKeyword,
-            SyntaxKind.StringKeyword,
-            SyntaxKind.CharKeyword,
-            SyntaxKind.ObjectKeyword
-        );
+        // var propertyType = seed.Type.Assert(
+        //     SyntaxKind.BoolKeyword,
+        //     SyntaxKind.ByteKeyword,
+        //     SyntaxKind.SByteKeyword,
+        //     SyntaxKind.ShortKeyword,
+        //     SyntaxKind.UShortKeyword,
+        //     SyntaxKind.IntKeyword,
+        //     SyntaxKind.UIntKeyword,
+        //     SyntaxKind.LongKeyword,
+        //     SyntaxKind.ULongKeyword,
+        //     SyntaxKind.DoubleKeyword,
+        //     SyntaxKind.FloatKeyword,
+        //     SyntaxKind.DecimalKeyword,
+        //     SyntaxKind.StringKeyword,
+        //     SyntaxKind.CharKeyword,
+        //     SyntaxKind.ObjectKeyword
+        // );
 
         return PropertyDeclaration(
-                PredefinedType(
-                    Token(propertyType)),
+                IdentifierName(seed.Type),
                 Identifier(seed.Identifier))
             .WithModifiers(
                 TokenList(
