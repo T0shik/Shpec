@@ -1,5 +1,4 @@
 ﻿using System.Collections.Immutable;
-using System.Collections.ObjectModel;
 using Microsoft.CodeAnalysis;
 using Shpec.Generators.Functions;
 using static Shpec.Generators.Utils.Ops;
@@ -23,47 +22,53 @@ public class SchemaGenerator : ISourceGenerator
         var transformFactory = new TransformFactory(propertyDeclarations);
         var transformComputedPropertyExpression = transformFactory.TransformComputedPropertyExpression();
 
-        var namespaceSeeds = syntaxReceiver.Declarations.Select(declaration => new NamespaceSeed(
-            declaration.Namespace,
-            new(
+        var namespaceSeeds = syntaxReceiver.Declarations.Select(declaration =>
+        {
+            IReadOnlyCollection<PropertySeed> properties = declaration.Members.Select(x =>
+                {
+                    var propertyDefinition = propertyDeclarations.FirstOrDefault(d => d.Identifier == x);
+                    if (propertyDefinition != null)
+                    {
+                        var (identifier, syntaxKind, validation) = propertyDefinition;
+
+                        var validationSeed = MapValidation.Map(validation);
+
+                        return new PropertySeed(identifier, syntaxKind, validationSeed);
+                    }
+
+                    var computedDefinition = computedProperties.FirstOrDefault(d => d.Identifier == x);
+                    if (computedDefinition != null)
+                    {
+                        var (identifier, syntaxKind, validation, exp) = computedDefinition;
+
+                        var validationSeed = MapValidation.Map(validation);
+
+                        return new ComputedPropertySeed(
+                            identifier,
+                            syntaxKind,
+                            validationSeed,
+                            transformComputedPropertyExpression.Transform(exp)
+                        );
+                    }
+
+                    throw new($"Failed to find declaration for {x} of {declaration.Class.Identifier}");
+                })
+                .ToList()
+                .AsReadOnly();
+
+            ClassSeed classSeed = new(
                 declaration.Class.Identifier,
                 declaration.Class.Accessibility,
                 BuildParents(declaration.Class.Parent),
-                declaration.Members.Select<string, Seed>(x =>
-                    {
-                        var propertyDefinition = propertyDeclarations.FirstOrDefault(d => d.Identifier == x);
-                        if (propertyDefinition != null)
-                        {
-                            var (identifier, syntaxKind, validation) = propertyDefinition;
-
-                            var validationSeed = MapValidation.Map(validation);
-
-                            return new PropertySeed(identifier, syntaxKind, validationSeed);
-                        }
-
-                        var computedDefinition = computedProperties.FirstOrDefault(d => d.Identifier == x);
-                        if (computedDefinition != null)
-                        {
-                            var (identifier, syntaxKind, validation, exp) = computedDefinition;
-
-                            var validationSeed = MapValidation.Map(validation);
-
-                            return new ComputedPropertySeed(
-                                identifier,
-                                syntaxKind,
-                                validationSeed,
-                                transformComputedPropertyExpression.Transform(exp)
-                            );
-                        }
-
-                        throw new($"Failed to find declaration for {x} of {declaration.Class.Identifier}");
-                    })
-                    .ToList()
-                    .AsReadOnly(),
+                properties,
                 ImmutableArray<ConversionSeed>.Empty,
                 declaration.Class.Static
-            )
-        )).ToList().AsReadOnly();
+            );
+
+            var usings = DetermineUsings.From(properties);
+            
+            return new NamespaceSeed(declaration.Namespace, classSeed, usings);
+        }).ToList().AsReadOnly();
 
         namespaceSeeds = namespaceSeeds
             .Select((ns, i) =>
@@ -86,7 +91,7 @@ public class SchemaGenerator : ISourceGenerator
 
         foreach (var classGen in namespaceSeeds.Select(x => new SchemaClassGenerator(x)))
         {
-            Try(() => context.AddSource(classGen.SourceName, classGen.Source), $"generating source for {classGen.SourceName}");
+            Try(() => context.AddSource(classGen.SourceName, classGen.Source()), $"generating source for {classGen.SourceName}");
         }
     }
 

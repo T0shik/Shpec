@@ -35,4 +35,4 @@ record ClassSeed(string Identifier, SyntaxKind Accessibility, ClassSeed? Parent,
     IReadOnlyCollection<Seed> Members, IReadOnlyCollection<ConversionSeed> Conversions,
     bool Static) : Seed;
 
-record NamespaceSeed(string Identifier, ClassSeed Clazz) : Seed;
+record NamespaceSeed(string Identifier, ClassSeed Clazz, IReadOnlyCollection<string> Usings) : Seed;

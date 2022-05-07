@@ -4,6 +4,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using Shpec.Generators.SyntaxTemplates;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using QualifiedNameSyntax = Microsoft.CodeAnalysis.VisualBasic.Syntax.QualifiedNameSyntax;
 
 namespace Shpec.Generators;
 
@@ -16,21 +17,32 @@ class SchemaClassGenerator
         _seed = seed;
     }
 
-    internal SourceText Source => CompilationUnit()
-        .WithUsings(
-                List<UsingDirectiveSyntax>(
-                    new UsingDirectiveSyntax[]{
-                        UsingDirective(
-                            QualifiedName(
-                                QualifiedName(
-                                    IdentifierName("System"),
-                                    IdentifierName("Collections")),
-                                IdentifierName("Immutable"))),
-                        UsingDirective(
-                            IdentifierName("Shpec"))}))
-        .WithMembers(SingletonList(NamespaceTemplate.Create(_seed)))
-        .NormalizeWhitespace()
-        .GetText(Encoding.UTF8);
+    internal SourceText Source()
+    {
+        List<UsingDirectiveSyntax> usings = new()
+        {
+            UsingDirective(
+                QualifiedName(
+                    QualifiedName(
+                        IdentifierName("System"),
+                        IdentifierName("Collections")),
+                    IdentifierName("Immutable"))),
+            
+            UsingDirective(IdentifierName("Shpec")),
+        };
+
+        foreach (var usingSeed in _seed.Usings)
+        {
+            usings.Add(UsingDirective(IdentifierName(usingSeed)));
+        }
+        
+
+        return CompilationUnit()
+            .WithUsings(List(usings))
+            .WithMembers(SingletonList(NamespaceTemplate.Create(_seed)))
+            .NormalizeWhitespace()
+            .GetText(Encoding.UTF8);
+    }
 
     internal string SourceName => GetName();
 

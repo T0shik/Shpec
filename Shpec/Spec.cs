@@ -1,5 +1,7 @@
 ﻿// ReSharper disable InconsistentNaming
 
+using System.Numerics;
+
 namespace Shpec;
 
 public partial class Member
@@ -11,6 +13,10 @@ public partial class Member
     public static implicit operator uint(Member p) => 0;
     public static implicit operator long(Member p) => 0;
     public static implicit operator ulong(Member p) => 0;
+    public static implicit operator float(Member p) => 0;
+    public static implicit operator double(Member p) => 0;
+    public static implicit operator decimal(Member p) => 0;
+    public static implicit operator BigInteger(Member p) => 0;
     public static implicit operator char(Member p) => char.MinValue;
     public static implicit operator string(Member p) => string.Empty;
     public static implicit operator TimeOnly(Member p) => TimeOnly.MinValue;

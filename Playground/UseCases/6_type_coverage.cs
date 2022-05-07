@@ -1,4 +1,5 @@
-﻿using Shpec;
+﻿using System.Numerics;
+using Shpec;
 using static Shpec.Declare;
 
 namespace Playground.UseCases;
@@ -13,6 +14,11 @@ public partial class type_coverage : IUseCase
             UShort,
             UInt,
             ULong,
+            Flo,
+            Dub,
+            Dec,
+            BigInt,
+            BigIntQual,
             Chr,
             Str,
             T1me,
@@ -29,6 +35,11 @@ public partial class type_coverage : IUseCase
         static uint UInt => _property();
         static long Long => _property();
         static ulong ULong => _property();
+        static float Flo => _property();
+        static double Dub => _property();
+        static decimal Dec => _property();
+        static BigInteger BigInt => _property();
+        static System.Numerics.BigInteger BigIntQual => _property();
         static char Chr => _property();
         static string Str => _property();
         static TimeOnly T1me => _property();
@@ -47,6 +58,11 @@ public partial class type_coverage : IUseCase
             UShort = 0,
             UInt = 0,
             ULong = 0,
+            Flo = 0,
+            Dub = 0,
+            Dec = 0,
+            BigInt = 0,
+            BigIntQual = 0,
             Chr = 'a',
             Str = "",
             T1me = TimeOnly.MaxValue,
