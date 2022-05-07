@@ -44,6 +44,12 @@ class PropertyDeclarationsAggregate : ISyntaxReceiver
             var type = qualifiedNameSyntax.ToString();
             Declarations.Add(new(identifier, type, ImmutableArray<AdHocValidation>.Empty));
         }
+        
+        else if (propertyDeclarationSyntax.Type is ArrayTypeSyntax arrayTypeSyntax)
+        {
+            var type = arrayTypeSyntax.ToString();
+            Declarations.Add(new(identifier, type, ImmutableArray<AdHocValidation>.Empty));
+        }
         else
         {
             throw new ShpecAggregationException("unsupported property declaration", propertyDeclarationSyntax);

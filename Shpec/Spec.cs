@@ -1,6 +1,7 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using System.Numerics;
+using Microsoft.VisualBasic.CompilerServices;
 
 namespace Shpec;
 
@@ -23,6 +24,22 @@ public partial class Member
     public static implicit operator DateOnly(Member p) => DateOnly.MinValue;
     public static implicit operator DateTime(Member p) => DateTime.MinValue;
     public static implicit operator DateTimeOffset(Member p) => DateTimeOffset.MinValue;
+    public static implicit operator short[](Member p) => Array.Empty<short>();
+    public static implicit operator ushort[](Member p) => Array.Empty<ushort>();
+    public static implicit operator int[](Member p) => Array.Empty<int>();
+    public static implicit operator uint[](Member p) => Array.Empty<uint>();
+    public static implicit operator long[](Member p) => Array.Empty<long>();
+    public static implicit operator ulong[](Member p) => Array.Empty<ulong>();
+    public static implicit operator float[](Member p) => Array.Empty<float>();
+    public static implicit operator double[](Member p) => Array.Empty<double>();
+    public static implicit operator decimal[](Member p) => Array.Empty<decimal>();
+    public static implicit operator BigInteger[](Member p) => Array.Empty<BigInteger>();
+    public static implicit operator char[](Member p) => Array.Empty<char>();
+    public static implicit operator string[](Member p) => Array.Empty<string>();
+    public static implicit operator TimeOnly[](Member p) => Array.Empty<TimeOnly>();
+    public static implicit operator DateOnly[](Member p) => Array.Empty<DateOnly>();
+    public static implicit operator DateTime[](Member p) => Array.Empty<DateTime>();
+    public static implicit operator DateTimeOffset[](Member p) => Array.Empty<DateTimeOffset>();
 }
 
 public static class Declare

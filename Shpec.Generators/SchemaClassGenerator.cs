@@ -4,7 +4,6 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using Shpec.Generators.SyntaxTemplates;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using QualifiedNameSyntax = Microsoft.CodeAnalysis.VisualBasic.Syntax.QualifiedNameSyntax;
 
 namespace Shpec.Generators;
 
