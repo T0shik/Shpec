@@ -7,51 +7,72 @@ namespace Shpec.Generators.SyntaxTemplates;
 
 internal class ValidationMethodTemplate
 {
-    public static MemberDeclarationSyntax Create(IReadOnlyCollection<PropertySeed> seeds)
+    public static MemberDeclarationSyntax? Create(ClassSeed seed)
+    {
+        List<PropertySeed> properties = new();
+
+        foreach (var m in seed.Members)
+        {
+            if (m is PropertySeed { Validations: { Count: > 0 } } ps)
+            {
+                properties.Add(ps);
+            }
+        }
+
+
+        if (properties.Count == 0)
+        {
+            return null;
+        }
+
+        return Create(properties.AsReadOnly());
+    }
+
+    private static MemberDeclarationSyntax Create(IReadOnlyCollection<PropertySeed> seeds)
     {
         List<StatementSyntax> statements = new();
 
         statements.Add(CreateResultsDeclaration());
 
-        statements.AddRange(seeds.Select(x => CreatePropertyValidationStatements(x)));
+        statements.AddRange(seeds.Select(CreatePropertyValidationStatements));
 
         statements.Add(CreateReturnStatement());
 
         return MethodDeclaration(IdentifierName("ValidationResult"), Identifier("Valid"))
-                .WithModifiers(TokenList(Token(SyntaxKind.PublicKeyword)))
-                .WithBody(Block(statements));
+            .WithModifiers(TokenList(Token(SyntaxKind.PublicKeyword)))
+            .WithBody(Block(statements));
     }
 
     public static LocalDeclarationStatementSyntax CreateResultsDeclaration()
     {
         return LocalDeclarationStatement(
             VariableDeclaration(
-                IdentifierName(
-                    Identifier(
-                        TriviaList(),
-                        SyntaxKind.VarKeyword,
-                        "var",
-                        "var",
-                        TriviaList())))
-            .WithVariables(
-                SingletonSeparatedList<VariableDeclaratorSyntax>(
-                    VariableDeclarator(
-                        Identifier("builder"))
-                    .WithInitializer(
-                        EqualsValueClause(
-                            InvocationExpression(
-                                MemberAccessExpression(
-                                    SyntaxKind.SimpleMemberAccessExpression,
-                                    MemberAccessExpression(
-                                        SyntaxKind.SimpleMemberAccessExpression,
-                                        GenericName(
-                                            Identifier("ImmutableArray"))
-                                        .WithTypeArgumentList(
-                                            TypeArgumentList(
-                                                SingletonSeparatedList<TypeSyntax>(
-                                                                    IdentifierName("ValidationError")))),
-                                        IdentifierName("Empty")),
-                                    IdentifierName("ToBuilder"))))))));
+                    IdentifierName(
+                        Identifier(
+                            TriviaList(),
+                            SyntaxKind.VarKeyword,
+                            "var",
+                            "var",
+                            TriviaList())))
+                .WithVariables(
+                    SingletonSeparatedList<VariableDeclaratorSyntax>(
+                        VariableDeclarator(
+                                Identifier("builder"))
+                            .WithInitializer(
+                                EqualsValueClause(
+                                    InvocationExpression(
+                                        MemberAccessExpression(
+                                            SyntaxKind.SimpleMemberAccessExpression,
+                                            MemberAccessExpression(
+                                                SyntaxKind.SimpleMemberAccessExpression,
+                                                GenericName(
+                                                        Identifier("ImmutableArray"))
+                                                    .WithTypeArgumentList(
+                                                        TypeArgumentList(
+                                                            SingletonSeparatedList<TypeSyntax>(
+                                                                IdentifierName("ValidationError")))),
+                                                IdentifierName("Empty")),
+                                            IdentifierName("ToBuilder"))))))));
     }
 
     public static IfStatementSyntax CreatePropertyValidationStatements(PropertySeed propertySeed)
@@ -64,50 +85,52 @@ internal class ValidationMethodTemplate
                 SingletonList<StatementSyntax>(
                     ExpressionStatement(
                         InvocationExpression(
-                            MemberAccessExpression(
-                                SyntaxKind.SimpleMemberAccessExpression,
-                                IdentifierName("builder"),
-                                IdentifierName("Add")))
-                        .WithArgumentList(
-                            ArgumentList(
-                                SingletonSeparatedList<ArgumentSyntax>(
-                                    Argument(
-                                        ObjectCreationExpression(
-                                            IdentifierName("ValidationError"))
-                                        .WithArgumentList(
-                                            ArgumentList(
-                                                SeparatedList<ArgumentSyntax>(
-                                                    new SyntaxNodeOrToken[]{
-                                                        Argument(
-                                                            LiteralExpression(
-                                                                SyntaxKind.StringLiteralExpression,
-                                                                Literal(propertySeed.Identifier))),
-                                                        Token(SyntaxKind.CommaToken),
-                                                        Argument(
-                                                            MemberAccessExpression(
-                                                                SyntaxKind.SimpleMemberAccessExpression,
-                                                                ThisExpression(),
-                                                                IdentifierName(propertySeed.Identifier))),
-                                                        Token(SyntaxKind.CommaToken),
-                                                        Argument(
-                                                            LiteralExpression(
-                                                                SyntaxKind.StringLiteralExpression,
-                                                                Literal("todo: Some Error")))})))))))))));
+                                MemberAccessExpression(
+                                    SyntaxKind.SimpleMemberAccessExpression,
+                                    IdentifierName("builder"),
+                                    IdentifierName("Add")))
+                            .WithArgumentList(
+                                ArgumentList(
+                                    SingletonSeparatedList<ArgumentSyntax>(
+                                        Argument(
+                                            ObjectCreationExpression(
+                                                    IdentifierName("ValidationError"))
+                                                .WithArgumentList(
+                                                    ArgumentList(
+                                                        SeparatedList<ArgumentSyntax>(
+                                                            new SyntaxNodeOrToken[]
+                                                            {
+                                                                Argument(
+                                                                    LiteralExpression(
+                                                                        SyntaxKind.StringLiteralExpression,
+                                                                        Literal(propertySeed.Identifier))),
+                                                                Token(SyntaxKind.CommaToken),
+                                                                Argument(
+                                                                    MemberAccessExpression(
+                                                                        SyntaxKind.SimpleMemberAccessExpression,
+                                                                        ThisExpression(),
+                                                                        IdentifierName(propertySeed.Identifier))),
+                                                                Token(SyntaxKind.CommaToken),
+                                                                Argument(
+                                                                    LiteralExpression(
+                                                                        SyntaxKind.StringLiteralExpression,
+                                                                        Literal("todo: Some Error")))
+                                                            })))))))))));
     }
 
     public static ReturnStatementSyntax CreateReturnStatement()
     {
         return ReturnStatement(
             ImplicitObjectCreationExpression()
-            .WithArgumentList(
-                ArgumentList(
-                    SingletonSeparatedList<ArgumentSyntax>(
-                        Argument(
-                            InvocationExpression(
-                                MemberAccessExpression(
-                                    SyntaxKind.SimpleMemberAccessExpression,
-                                    IdentifierName("builder"),
-                                    IdentifierName("ToImmutableArray"))))))));
+                .WithArgumentList(
+                    ArgumentList(
+                        SingletonSeparatedList<ArgumentSyntax>(
+                            Argument(
+                                InvocationExpression(
+                                    MemberAccessExpression(
+                                        SyntaxKind.SimpleMemberAccessExpression,
+                                        IdentifierName("builder"),
+                                        IdentifierName("ToImmutableArray"))))))));
     }
 
     public static class TransformValidationExpression
@@ -124,25 +147,25 @@ internal class ValidationMethodTemplate
             if (binaryExpression is { Left: IdentifierNameSyntax, Right: LiteralExpressionSyntax })
             {
                 return BinaryExpression(
-                            InvertArithmeticComparison(binaryExpression.OperatorToken.Kind()),
-                            MemberAccessExpression(
-                                SyntaxKind.SimpleMemberAccessExpression,
-                                ThisExpression(),
-                                IdentifierName(property.Identifier)),
-                            binaryExpression.Right
-                            );
+                    InvertArithmeticComparison(binaryExpression.OperatorToken.Kind()),
+                    MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        ThisExpression(),
+                        IdentifierName(property.Identifier)),
+                    binaryExpression.Right
+                );
             }
 
             if (binaryExpression is { Left: LiteralExpressionSyntax, Right: IdentifierNameSyntax })
             {
                 return BinaryExpression(
-                            InvertArithmeticComparison(binaryExpression.OperatorToken.Kind()),
-                            binaryExpression.Left,
-                            MemberAccessExpression(
-                                SyntaxKind.SimpleMemberAccessExpression,
-                                ThisExpression(),
-                                IdentifierName(property.Identifier))
-                            );
+                    InvertArithmeticComparison(binaryExpression.OperatorToken.Kind()),
+                    binaryExpression.Left,
+                    MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        ThisExpression(),
+                        IdentifierName(property.Identifier))
+                );
             }
 
             throw new Exception($"{nameof(TransformValidationExpression.Transform)}: unsupported {binaryExpression} for {property}");

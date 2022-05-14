@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using System.Security.Cryptography;
 using Microsoft.CodeAnalysis;
 using Shpec.Generators.Functions;
 using static Shpec.Generators.Utils.Ops;
@@ -62,7 +63,8 @@ public class SchemaGenerator : ISourceGenerator
                 BuildParents(declaration.Class.Parent),
                 properties,
                 ImmutableArray<ConversionSeed>.Empty,
-                declaration.Class.Static
+                declaration.Class.Static,
+                declaration.Class.Record
             );
 
             var usings = DetermineUsings.From(properties);
@@ -105,7 +107,8 @@ public class SchemaGenerator : ISourceGenerator
                 BuildParents(parent.Parent),
                 ImmutableArray<Seed>.Empty,
                 ImmutableArray<ConversionSeed>.Empty,
-                parent.Static
+                parent.Static,
+                parent.Record
             );
     }
 

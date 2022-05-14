@@ -16,7 +16,8 @@ record ClassDeclaration(
     string Identifier,
     SyntaxKind Accessibility,
     ClassDeclaration? Parent,
-    bool Static = false
+    bool Static = false,
+    bool Record = false
 );
 
 
@@ -33,6 +34,6 @@ record ConversionSeed(NamespaceSeed Target, NamespaceSeed From, IReadOnlyCollect
 
 record ClassSeed(string Identifier, SyntaxKind Accessibility, ClassSeed? Parent,
     IReadOnlyCollection<Seed> Members, IReadOnlyCollection<ConversionSeed> Conversions,
-    bool Static) : Seed;
+    bool Static, bool Record) : Seed;
 
 record NamespaceSeed(string Identifier, ClassSeed Clazz, IReadOnlyCollection<string> Usings) : Seed;

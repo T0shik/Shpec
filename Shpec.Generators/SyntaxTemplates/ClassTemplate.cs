@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis.CSharp;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -11,23 +12,26 @@ class ClassTemplate
         return Create(seed, null);
     }
 
-    private static MemberDeclarationSyntax Create(ClassSeed seed, MemberDeclarationSyntax? child)
+    public static MemberDeclarationSyntax Create(ClassSeed seed, MemberDeclarationSyntax? child)
     {
         var declaration = CreateClassDeclaration(seed, child);
         return seed.Parent switch
         {
-            { } s => CreateClassDeclaration(s, declaration),
+            { Record: false } parent => Create(parent, declaration),
+            { Record: true } parent => RecordTemplate.Create(parent, declaration),
             null => declaration,
         };
     }
 
     private static MemberDeclarationSyntax CreateClassDeclaration(ClassSeed seed, MemberDeclarationSyntax? child)
     {
-        var classTokens = new[] { Token(seed.Accessibility), Token(SyntaxKind.PartialKeyword) }.AsEnumerable();
+        var classTokens = new List<SyntaxToken>() { Token(seed.Accessibility) };
         if (seed.Static)
         {
-            classTokens = classTokens.Append(Token(SyntaxKind.StaticKeyword));
+            classTokens.Add(Token(SyntaxKind.StaticKeyword));
         }
+
+        classTokens.Add(Token(SyntaxKind.PartialKeyword));
 
         List<MemberDeclarationSyntax> members = new();
 
@@ -51,7 +55,7 @@ class ClassTemplate
             members.Add(ConversionOperatorTemplate.Create(conversion));
         }
 
-        var validationMember = CreateValidationMember(seed);
+        var validationMember = ValidationMethodTemplate.Create(seed);
         if (validationMember != null)
         {
             members.Add(validationMember);
@@ -60,27 +64,5 @@ class ClassTemplate
         return ClassDeclaration(seed.Identifier)
             .WithModifiers(TokenList(classTokens))
             .WithMembers(List(members));
-    }
-
-    public static MemberDeclarationSyntax? CreateValidationMember(ClassSeed classSeed)
-    {
-        List<PropertySeed> properties = new();
-
-
-        foreach (var m in classSeed.Members)
-        {
-            if (m is PropertySeed { Validations: { Count: > 0 } } ps)
-            {
-                properties.Add(ps);
-            }
-        }
-
-
-        if (properties.Count == 0)
-        {
-            return null;
-        }
-
-        return ValidationMethodTemplate.Create(properties.AsReadOnly());
     }
 }

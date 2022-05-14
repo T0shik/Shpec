@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Shpec.Generators.Utils;
 
 namespace Shpec.Generators.Aggregators;
 
@@ -18,10 +19,29 @@ class DefinitionsAggregate : ISyntaxReceiver
 
         var propertyNames = GetProperties(propertyDeclaration);
 
+        ClassDeclaration? clazz = null;
+        TypeDeclarationSyntax? classDeclaration = propertyDeclaration.TryGetParent<ClassDeclarationSyntax>();
+        if (classDeclaration != null)
+        {
+            clazz = CaptureClassHierarchy(classDeclaration, false);
+        }
+
+        if (clazz == null)
+        {
+            classDeclaration= propertyDeclaration.TryGetParent<RecordDeclarationSyntax>();
+            if (classDeclaration != null)
+            {
+                clazz = CaptureClassHierarchy(classDeclaration, true);
+            }
+        }
+
+        if (clazz == null)
+        {
+            throw new ShpecAggregationException("failed to fined enclosing type", syntaxNode);
+        }
+
         var namespaceDeclaration = propertyDeclaration.GetParent<FileScopedNamespaceDeclarationSyntax>();
-        var classDeclaration = propertyDeclaration.GetParent<ClassDeclarationSyntax>();
         var ns = namespaceDeclaration.Name.ToString();
-        var clazz = CaptureClassHierarchy(classDeclaration);
 
         var key = $"{ns}.{clazz}";
         if (Definitions.ContainsKey(key))
@@ -49,11 +69,10 @@ class DefinitionsAggregate : ISyntaxReceiver
                 .ToImmutableArray();
         }
 
-
         throw new($"Unknown Scenario {propertyDeclaration.FullSpan}");
     }
 
-    private static ClassDeclaration CaptureClassHierarchy(ClassDeclarationSyntax classDeclarationSyntax)
+    private static ClassDeclaration CaptureClassHierarchy(TypeDeclarationSyntax classDeclarationSyntax, bool record)
     {
         var id = classDeclarationSyntax.Identifier.ToString();
 
@@ -67,9 +86,18 @@ class DefinitionsAggregate : ISyntaxReceiver
 
         var statik = classDeclarationSyntax.Modifiers.Any(x => x.IsKind(SyntaxKind.StaticKeyword));
 
-        var parent = classDeclarationSyntax.TryGetParent<ClassDeclarationSyntax>();
-        return parent == null
-            ? new(id, accessibility, null, statik)
-            : new(id, accessibility, CaptureClassHierarchy(parent), statik);
+        TypeDeclarationSyntax? parent = classDeclarationSyntax.TryGetParent<ClassDeclarationSyntax>();
+        if (parent != null)
+        {
+            return new(id, accessibility, CaptureClassHierarchy(parent, false), statik, record);
+        }
+
+        parent = classDeclarationSyntax.TryGetParent<RecordDeclarationSyntax>();
+        if (parent != null)
+        {
+            return new(id, accessibility, CaptureClassHierarchy(parent, true), statik, record);
+        }
+
+        return new(id, accessibility, null, statik, record);
     }
 }
