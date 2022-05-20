@@ -64,9 +64,10 @@ public class SchemaGenerator : ISourceGenerator
                 properties,
                 ImmutableArray<ConversionSeed>.Empty,
                 declaration.Class.Static,
-                declaration.Class.Record
+                declaration.Class.Record,
+                declaration.Class.Struct
             );
-
+            
             var usings = DetermineUsings.From(properties);
             
             return new NamespaceSeed(declaration.Namespace, classSeed, usings);
@@ -108,7 +109,8 @@ public class SchemaGenerator : ISourceGenerator
                 ImmutableArray<Seed>.Empty,
                 ImmutableArray<ConversionSeed>.Empty,
                 parent.Static,
-                parent.Record
+                parent.Record,
+                parent.Struct
             );
     }
 

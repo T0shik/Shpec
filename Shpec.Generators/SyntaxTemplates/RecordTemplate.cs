@@ -7,24 +7,7 @@ namespace Shpec.Generators.SyntaxTemplates;
 
 class RecordTemplate
 {
-    public static MemberDeclarationSyntax Create(ClassSeed seed)
-    {
-        return Create(seed, null);
-    }
-
-    public static MemberDeclarationSyntax Create(ClassSeed seed, MemberDeclarationSyntax? child)
-    {
-        var declaration = CreateClassDeclaration(seed, child);
-        return seed.Parent switch
-        {
-            { Record: true } parent => Create(parent, declaration),
-            { Record: false } parent => ClassTemplate.Create(parent, declaration),
-            null => declaration,
-        };
-    }
-
-
-    private static MemberDeclarationSyntax CreateClassDeclaration(ClassSeed seed, MemberDeclarationSyntax? child)
+    public static MemberDeclarationSyntax CreateRecordDeclaration(ClassSeed seed, MemberDeclarationSyntax? child)
     {
         var recordTokens = new List<SyntaxToken>() { Token(seed.Accessibility) };
         if (seed.Static)
@@ -41,7 +24,7 @@ class RecordTemplate
                 .SelectMany(x => x switch
                 {
                     ComputedPropertySeed cps => ComputedPropertyTemplate.Create(cps),
-                    ClassSeed cs => new() { Create(cs) },
+                    ClassSeed cs => new() { ClassTemplate.Create(cs) },
                     _ => throw new NotImplementedException("Unhandled seed in Record Template."),
                 })
         );

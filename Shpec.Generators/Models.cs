@@ -16,8 +16,9 @@ record ClassDeclaration(
     string Identifier,
     SyntaxKind Accessibility,
     ClassDeclaration? Parent,
-    bool Static = false,
-    bool Record = false
+    bool Static,
+    bool Record,
+    bool Struct
 );
 
 
@@ -32,8 +33,15 @@ record ComputedPropertySeed(string Identifier, string Type, IReadOnlyCollection<
 
 record ConversionSeed(NamespaceSeed Target, NamespaceSeed From, IReadOnlyCollection<string> Properties);
 
-record ClassSeed(string Identifier, SyntaxKind Accessibility, ClassSeed? Parent,
-    IReadOnlyCollection<Seed> Members, IReadOnlyCollection<ConversionSeed> Conversions,
-    bool Static, bool Record) : Seed;
+record ClassSeed(
+    string Identifier, 
+    SyntaxKind Accessibility, 
+    ClassSeed? Parent,
+    IReadOnlyCollection<Seed> Members, 
+    IReadOnlyCollection<ConversionSeed> Conversions,
+    bool Static, 
+    bool Record,
+    bool Struct
+    ) : Seed;
 
 record NamespaceSeed(string Identifier, ClassSeed Clazz, IReadOnlyCollection<string> Usings) : Seed;

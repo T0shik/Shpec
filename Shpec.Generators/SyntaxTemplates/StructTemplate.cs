@@ -5,32 +5,9 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Shpec.Generators.SyntaxTemplates;
 
-class ClassTemplate
+class StructTemplate
 {
-    public static MemberDeclarationSyntax Create(ClassSeed seed)
-    {
-        return Create(seed, null);
-    }
-
-    public static MemberDeclarationSyntax Create(ClassSeed seed, MemberDeclarationSyntax? child)
-    {
-        var declaration = seed switch
-        {
-            { Struct: true, Record: true } => throw new Exception("struct records not supported yet"),
-            { Struct: true } => StructTemplate.CreateStructDeclaration(seed, child),
-            { Record: true } => RecordTemplate.CreateRecordDeclaration(seed, child),
-            { Record: false } => CreateClassDeclaration(seed, child),
-            _ => throw new Exception(":(")
-        };
-        if (seed.Parent == null)
-        {
-            return declaration;
-        }
-
-        return Create(seed.Parent, declaration);
-    }
-
-    private static MemberDeclarationSyntax CreateClassDeclaration(ClassSeed seed, MemberDeclarationSyntax? child)
+    public static MemberDeclarationSyntax CreateStructDeclaration(ClassSeed seed, MemberDeclarationSyntax? child)
     {
         var classTokens = new List<SyntaxToken>() { Token(seed.Accessibility) };
         if (seed.Static)
@@ -47,7 +24,7 @@ class ClassTemplate
             {
                 ComputedPropertySeed cps => ComputedPropertyTemplate.Create(cps),
                 PropertySeed ps => new() { PropertyTemplate.Create(ps) },
-                ClassSeed cs => new() { Create(cs) },
+                ClassSeed cs => new() { ClassTemplate.Create(cs) },
                 _ => throw new NotImplementedException("Unhandled Seed."),
             })
         );
@@ -68,7 +45,7 @@ class ClassTemplate
             members.Add(validationMember);
         }
 
-        return ClassDeclaration(seed.Identifier)
+        return StructDeclaration(seed.Identifier)
             .WithModifiers(TokenList(classTokens))
             .WithMembers(List(members));
     }

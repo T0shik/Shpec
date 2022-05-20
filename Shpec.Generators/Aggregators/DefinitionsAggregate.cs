@@ -20,18 +20,27 @@ class DefinitionsAggregate : ISyntaxReceiver
         var propertyNames = GetProperties(propertyDeclaration);
 
         ClassDeclaration? clazz = null;
-        TypeDeclarationSyntax? classDeclaration = propertyDeclaration.TryGetParent<ClassDeclarationSyntax>();
-        if (classDeclaration != null)
+        TypeDeclarationSyntax? typeDeclaration = propertyDeclaration.TryGetParent<ClassDeclarationSyntax>();
+        if (typeDeclaration != null)
         {
-            clazz = CaptureClassHierarchy(classDeclaration, false);
+            clazz = CaptureClassHierarchy(typeDeclaration);
         }
 
         if (clazz == null)
         {
-            classDeclaration= propertyDeclaration.TryGetParent<RecordDeclarationSyntax>();
-            if (classDeclaration != null)
+            typeDeclaration = propertyDeclaration.TryGetParent<StructDeclarationSyntax>();
+            if (typeDeclaration != null)
             {
-                clazz = CaptureClassHierarchy(classDeclaration, true);
+                clazz = CaptureClassHierarchy(typeDeclaration, stract: true);
+            }
+        }
+
+        if (clazz == null)
+        {
+            typeDeclaration = propertyDeclaration.TryGetParent<RecordDeclarationSyntax>();
+            if (typeDeclaration != null)
+            {
+                clazz = CaptureClassHierarchy(typeDeclaration, record: true);
             }
         }
 
@@ -72,7 +81,7 @@ class DefinitionsAggregate : ISyntaxReceiver
         throw new($"Unknown Scenario {propertyDeclaration.FullSpan}");
     }
 
-    private static ClassDeclaration CaptureClassHierarchy(TypeDeclarationSyntax classDeclarationSyntax, bool record)
+    private static ClassDeclaration CaptureClassHierarchy(TypeDeclarationSyntax classDeclarationSyntax, bool record = false, bool stract = false)
     {
         var id = classDeclarationSyntax.Identifier.ToString();
 
@@ -89,15 +98,21 @@ class DefinitionsAggregate : ISyntaxReceiver
         TypeDeclarationSyntax? parent = classDeclarationSyntax.TryGetParent<ClassDeclarationSyntax>();
         if (parent != null)
         {
-            return new(id, accessibility, CaptureClassHierarchy(parent, false), statik, record);
+            return new(id, accessibility, CaptureClassHierarchy(parent), statik, record, stract);
+        }
+
+        parent = classDeclarationSyntax.TryGetParent<StructDeclarationSyntax>();
+        if (parent != null)
+        {
+            return new(id, accessibility, CaptureClassHierarchy(parent, stract: true), statik, record, stract);
         }
 
         parent = classDeclarationSyntax.TryGetParent<RecordDeclarationSyntax>();
         if (parent != null)
         {
-            return new(id, accessibility, CaptureClassHierarchy(parent, true), statik, record);
+            return new(id, accessibility, CaptureClassHierarchy(parent, record: true), statik, record, stract);
         }
 
-        return new(id, accessibility, null, statik, record);
+        return new(id, accessibility, null, statik, record, stract);
     }
 }
