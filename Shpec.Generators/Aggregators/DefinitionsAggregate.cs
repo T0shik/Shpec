@@ -97,11 +97,6 @@ class DefinitionsAggregate : ISyntaxReceiver
         TypeDeclarationSyntax? parent = typeDeclaration.TryGetParent<ClassDeclarationSyntax>();
         if (parent != null)
         {
-            if (id == "Brr")
-            {
-                throw new ShpecAggregationException("", typeDeclaration);
-            }
-
             return new(id, accessibility, CaptureClassHierarchy(parent), statik, record, stract);
         }
 
