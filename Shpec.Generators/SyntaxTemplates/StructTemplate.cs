@@ -10,10 +10,6 @@ class StructTemplate
     public static MemberDeclarationSyntax CreateStructDeclaration(ClassSeed seed, MemberDeclarationSyntax? child)
     {
         var classTokens = new List<SyntaxToken>() { Token(seed.Accessibility) };
-        if (seed.Static)
-        {
-            classTokens.Add(Token(SyntaxKind.StaticKeyword));
-        }
 
         classTokens.Add(Token(SyntaxKind.PartialKeyword));
 
