@@ -2,7 +2,7 @@
 namespace Playground.UseCases;
 
 
-public partial class struct_ctor : IUseCase
+public partial struct struct_ctor : IUseCase
 {
     Properties _p => new(
         Property.FirstName,
