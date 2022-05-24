@@ -5,8 +5,15 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace Shpec.Generators;
 
 record BaseValidation;
+
 record AdHocValidation(SimpleLambdaExpressionSyntax Exp) : BaseValidation;
-record PropertyDefinition(string Identifier, string Type, IReadOnlyCollection<BaseValidation> Validation);
+
+record PropertyDefinition(
+    string Identifier,
+    string Type,
+    IReadOnlyCollection<BaseValidation> Validation,
+    bool Immutable
+);
 
 record ComputedPropertyDefinition(string Identifier, string Type, IReadOnlyCollection<BaseValidation> Validation, ExpressionSyntax Expression);
 
@@ -21,27 +28,33 @@ record ClassDeclaration(
     bool Struct
 );
 
-
 record Seed;
+
 record ValidationSeed;
+
 record AdHocValidationSeed(ExpressionSyntax Expression) : ValidationSeed;
 
-record PropertySeed(string Identifier, string Type, IReadOnlyCollection<ValidationSeed> Validations) : Seed;
+record PropertySeed(
+    string Identifier,
+    string Type,
+    IReadOnlyCollection<ValidationSeed> Validations,
+    bool Immutable
+) : Seed;
 
 record ComputedPropertySeed(string Identifier, string Type, IReadOnlyCollection<ValidationSeed> Validations, ExpressionSyntax Expression)
-    : PropertySeed(Identifier, Type, Validations);
+    : PropertySeed(Identifier, Type, Validations, true);
 
 record ConversionSeed(NamespaceSeed Target, NamespaceSeed From, IReadOnlyCollection<string> Properties);
 
 record ClassSeed(
-    string Identifier, 
-    SyntaxKind Accessibility, 
+    string Identifier,
+    SyntaxKind Accessibility,
     ClassSeed? Parent,
-    IReadOnlyCollection<Seed> Members, 
+    IReadOnlyCollection<Seed> Members,
     IReadOnlyCollection<ConversionSeed> Conversions,
-    bool Static, 
+    bool Static,
     bool Record,
     bool Struct
-    ) : Seed;
+) : Seed;
 
 record NamespaceSeed(string Identifier, ClassSeed Clazz, IReadOnlyCollection<string> Usings) : Seed;

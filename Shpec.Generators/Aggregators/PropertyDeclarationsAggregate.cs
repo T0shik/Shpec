@@ -17,9 +17,16 @@ class PropertyDeclarationsAggregate : ISyntaxReceiver
         {
             AddSimple(a);
         }
-        else if (syntaxNode is InvocationExpressionSyntax { Expression: MemberAccessExpressionSyntax } b)
+        else if (syntaxNode is InvocationExpressionSyntax { Expression: MemberAccessExpressionSyntax m } b)
         {
-            AddFrom(b);
+            if (m is { Expression: IdentifierNameSyntax { Identifier.Text: "Declare" }, Name: IdentifierNameSyntax { Identifier.Text: "_property" } })
+            {
+                AddSimple(b);
+            }
+            else
+            {
+                AddFrom(b);
+            }
         }
     }
 
@@ -29,31 +36,20 @@ class PropertyDeclarationsAggregate : ISyntaxReceiver
             .GetParent<PropertyDeclarationSyntax>();
 
         var identifier = propertyDeclarationSyntax.Identifier.ToString();
-        if (propertyDeclarationSyntax.Type is PredefinedTypeSyntax predefinedTypeSyntax)
+        var type = propertyDeclarationSyntax.Type switch
         {
-            var type = predefinedTypeSyntax.Keyword.Text;
-            Declarations.Add(new(identifier, type, ImmutableArray<AdHocValidation>.Empty));
-        }
-        else if (propertyDeclarationSyntax.Type is IdentifierNameSyntax identifierNameSyntax)
-        {
-            var type = identifierNameSyntax.Identifier.Text;
-            Declarations.Add(new(identifier, type, ImmutableArray<AdHocValidation>.Empty));
-        }
-        else if (propertyDeclarationSyntax.Type is QualifiedNameSyntax qualifiedNameSyntax)
-        {
-            var type = qualifiedNameSyntax.ToString();
-            Declarations.Add(new(identifier, type, ImmutableArray<AdHocValidation>.Empty));
-        }
-        
-        else if (propertyDeclarationSyntax.Type is ArrayTypeSyntax arrayTypeSyntax)
-        {
-            var type = arrayTypeSyntax.ToString();
-            Declarations.Add(new(identifier, type, ImmutableArray<AdHocValidation>.Empty));
-        }
-        else
-        {
-            throw new ShpecAggregationException("unsupported property declaration", propertyDeclarationSyntax);
-        }
+            PredefinedTypeSyntax a => a.Keyword.Text,
+            IdentifierNameSyntax a => a.Identifier.Text,
+            QualifiedNameSyntax a => a.ToString(),
+            ArrayTypeSyntax a => a.ToString(),
+            _ => throw new ShpecAggregationException("unsupported property declaration", propertyDeclarationSyntax),
+        };
+
+        bool HasArgument(string arg) => invocationExpressionSyntax.ArgumentList.Arguments.Any(x => x.NameColon.Name.Identifier.Text == arg);
+
+        var immutable = HasArgument("immutable");
+
+        Declarations.Add(new(identifier, type, ImmutableArray<AdHocValidation>.Empty, immutable));
     }
 
     private void AddFrom(InvocationExpressionSyntax invocationExpressionSyntax)
@@ -106,6 +102,6 @@ class PropertyDeclarationsAggregate : ISyntaxReceiver
         var identifier = propertyDeclarationSyntax.Identifier.ToString();
         var type = predefinedTypeSyntax.Keyword.Text;
 
-        Declarations.Add(new(identifier, type, validation.AsReadOnly()));
+        Declarations.Add(new(identifier, type, validation.AsReadOnly(), false));
     }
 }

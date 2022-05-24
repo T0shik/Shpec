@@ -9,6 +9,12 @@ class PropertyTemplate
 {
     public static MemberDeclarationSyntax Create(PropertySeed seed)
     {
+        var setter = seed switch
+        {
+            { Immutable: true } => SyntaxKind.InitAccessorDeclaration,
+            _ => SyntaxKind.SetAccessorDeclaration,
+        };
+
         return PropertyDeclaration(
                 IdentifierName(seed.Type),
                 Identifier(seed.Identifier))
@@ -21,7 +27,7 @@ class PropertyTemplate
                     {
                         AccessorDeclaration(SyntaxKind.GetAccessorDeclaration)
                             .WithSemicolonToken(Token(SyntaxKind.SemicolonToken)),
-                        AccessorDeclaration(SyntaxKind.SetAccessorDeclaration)
+                        AccessorDeclaration(setter)
                             .WithSemicolonToken(Token(SyntaxKind.SemicolonToken))
                     })));
     }

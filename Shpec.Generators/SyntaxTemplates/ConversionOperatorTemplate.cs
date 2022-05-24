@@ -9,7 +9,6 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 static class ConversionOperatorTemplate
 {
     private const string FromVariableName = "__from";
-    private const string ToVariableName = "__to";
 
     private static string GetIdentifier(NamespaceSeed seed) => $"{seed.Identifier}.{GetClassIdentifier(seed.Clazz)}";
 
@@ -25,42 +24,35 @@ static class ConversionOperatorTemplate
         var fromId = GetIdentifier(seed.From);
         var properties = seed.Properties;
 
-        var blockStatements = new List<StatementSyntax>()
-        {
-            LocalDeclarationStatement(
-                VariableDeclaration(IdentifierName(Identifier(TriviaList(), SyntaxKind.VarKeyword, "var", "var", TriviaList())))
-                    .WithVariables(
-                        SingletonSeparatedList(
-                            VariableDeclarator(Identifier(ToVariableName))
-                                .WithInitializer(EqualsValueClause(ObjectCreationExpression(IdentifierName(toId))
-                                    .WithArgumentList(ArgumentList()))))))
-        };
+        var assignments = new List<SyntaxNodeOrToken>();
 
         foreach (var identifier in properties)
         {
-            blockStatements.Add(CreateAssignmentExpression(identifier));
+            assignments.Add(
+                AssignmentExpression(
+                    SyntaxKind.SimpleAssignmentExpression,
+                    IdentifierName(identifier),
+                    MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        IdentifierName(FromVariableName),
+                        IdentifierName(identifier)))
+            );
+            assignments.Add(
+                Token(SyntaxKind.CommaToken)
+            );
         }
-
-        blockStatements.Add(ReturnStatement(IdentifierName(ToVariableName)));
 
         return ConversionOperatorDeclaration(Token(SyntaxKind.ImplicitKeyword), IdentifierName(toId))
             .WithModifiers(TokenList(Token(SyntaxKind.PublicKeyword), Token(SyntaxKind.StaticKeyword)))
             .WithParameterList(ParameterList(SingletonSeparatedList(Parameter(Identifier(FromVariableName)).WithType(IdentifierName(fromId)))))
-            .WithBody(Block(blockStatements.ToArray()));
-    }
-
-    private static ExpressionStatementSyntax CreateAssignmentExpression(string propertyIdentifier)
-    {
-        return ExpressionStatement(
-            AssignmentExpression(
-                SyntaxKind.SimpleAssignmentExpression,
-                MemberAccessExpression(
-                    SyntaxKind.SimpleMemberAccessExpression,
-                    IdentifierName(ToVariableName),
-                    IdentifierName(propertyIdentifier)),
-                MemberAccessExpression(
-                    SyntaxKind.SimpleMemberAccessExpression,
-                    IdentifierName(FromVariableName),
-                    IdentifierName(propertyIdentifier))));
+            .WithExpressionBody(
+                ArrowExpressionClause(
+                    ObjectCreationExpression(IdentifierName(toId))
+                        .WithArgumentList(ArgumentList())
+                        .WithInitializer(
+                            InitializerExpression(
+                                SyntaxKind.ObjectInitializerExpression,
+                                SeparatedList<ExpressionSyntax>(assignments)))))
+            .WithSemicolonToken(Token(SyntaxKind.SemicolonToken));
     }
 }

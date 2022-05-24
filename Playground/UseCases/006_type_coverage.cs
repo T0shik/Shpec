@@ -8,6 +8,7 @@ public partial class type_coverage : IUseCase
 {
     Properties _p =>
         new(
+            Boole4n,
             Short,
             UShort,
             Int,
@@ -47,6 +48,7 @@ public partial class type_coverage : IUseCase
 
     public class Props
     {
+        static bool Boole4n => _property();
         static short Short => _property();
         static ushort UShort => _property();
         static int Int => _property();
@@ -87,6 +89,7 @@ public partial class type_coverage : IUseCase
     {
         var e = new type_coverage()
         {
+            Boole4n = true,
             Short = 0,
             UShort = 0,
             Int = 0,

@@ -8,6 +8,7 @@ namespace Shpec;
 public partial class Member
 {
     public static readonly Member Default = new();
+    public static implicit operator bool(Member p) => default;
     public static implicit operator short(Member p) => 0;
     public static implicit operator ushort(Member p) => 0;
     public static implicit operator int(Member p) => 0;
@@ -44,9 +45,8 @@ public partial class Member
 
 public static class Declare
 {
-    public static Member _property() => Member.Default;
-    public static Property<T> _property<T>() => new();
-    public static Property<T> _property<T>(Func<T, bool> predicate) => new();
+    public static Member _property(bool immutable = false) => Member.Default;
+    public static Property<T> _property<T>(bool immutable = false) => new();
     public static Member _computed(object o) => new();
     public static Computed<T> _computed<T>(object o) => new();
 }

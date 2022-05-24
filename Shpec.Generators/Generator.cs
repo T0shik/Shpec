@@ -30,11 +30,11 @@ public class SchemaGenerator : ISourceGenerator
                     var propertyDefinition = propertyDeclarations.FirstOrDefault(d => d.Identifier == x);
                     if (propertyDefinition != null)
                     {
-                        var (identifier, syntaxKind, validation) = propertyDefinition;
+                        var (identifier, syntaxKind, validation, immutable) = propertyDefinition;
 
                         var validationSeed = MapValidation.Map(validation);
 
-                        return new PropertySeed(identifier, syntaxKind, validationSeed);
+                        return new PropertySeed(identifier, syntaxKind, validationSeed, immutable);
                     }
 
                     var computedDefinition = computedProperties.FirstOrDefault(d => d.Identifier == x);
