@@ -10,12 +10,13 @@ class RecordTemplate
     public static MemberDeclarationSyntax CreateRecordDeclaration(ClassSeed seed, MemberDeclarationSyntax? child)
     {
         var recordTokens = new List<SyntaxToken>() { Token(seed.Accessibility) };
-        if (seed.Static)
+        if (!seed.Struct && seed.Static)
         {
             recordTokens.Add(Token(SyntaxKind.StaticKeyword));
         }
+
         recordTokens.Add(Token(SyntaxKind.PartialKeyword));
-        
+
         List<MemberDeclarationSyntax> members = new();
 
         members.AddRange(
@@ -47,10 +48,17 @@ class RecordTemplate
         }
 
         var parameters = CreateParameters(seed.Members.OfType<PropertySeed>());
-        
-        return RecordDeclaration(Token(SyntaxKind.RecordKeyword), Identifier(seed.Identifier))
-            .WithModifiers(TokenList(recordTokens))
-            .WithParameterList(ParameterList(parameters))
+
+        var declaration = RecordDeclaration(Token(SyntaxKind.RecordKeyword), Identifier(seed.Identifier))
+            .WithModifiers(TokenList(recordTokens));
+
+        if (seed.Struct)
+        {
+            declaration = declaration.WithClassOrStructKeyword(
+                Token(SyntaxKind.StructKeyword));
+        }
+
+        return declaration.WithParameterList(ParameterList(parameters))
             .WithOpenBraceToken(Token(SyntaxKind.OpenBraceToken))
             .WithMembers(List(members))
             .WithCloseBraceToken(Token(SyntaxKind.CloseBraceToken));

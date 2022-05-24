@@ -16,9 +16,9 @@ class ClassTemplate
     {
         var declaration = seed switch
         {
-            { Struct: true, Record: true } => throw new Exception("struct records not supported yet"),
-            { Struct: true } => StructTemplate.CreateStructDeclaration(seed, child),
+            { Struct: true, Record: true } => RecordTemplate.CreateRecordDeclaration(seed, child),
             { Record: true } => RecordTemplate.CreateRecordDeclaration(seed, child),
+            { Struct: true } => StructTemplate.CreateStructDeclaration(seed, child),
             { Record: false } => CreateClassDeclaration(seed, child),
             _ => throw new Exception(":(")
         };
