@@ -42,6 +42,13 @@ class ClassTemplate
 
         List<MemberDeclarationSyntax> members = new();
 
+        var ctor = ConstructorTemplate.CreateConstructor(seed);
+        if (ctor != null)
+        {
+            members.Add(ConstructorTemplate.CreateDefaultConstructor(seed));
+            members.Add(ctor);
+        }
+
         members.AddRange(
             seed.Members.SelectMany(x => x switch
             {
