@@ -1,4 +1,5 @@
-﻿using static Shpec.Declare;
+﻿using Shpec;
+using static Shpec.Declare;
 
 #pragma warning disable CS8618
 
@@ -10,7 +11,7 @@ public static class Property
     public static string LastName => _property();
     public static string Colour => _property();
     public static string Size => _property();
-    public static int Age => _property();
+    public static int Age = _property();
 }
 
 public class Computed

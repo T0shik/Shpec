@@ -4,7 +4,7 @@ namespace Playground.UseCases;
 
 public partial class give_class_properties : IUseCase
 {
-    Properties _p => new(
+    Members _p => new(
         Property.FirstName,
         Property.LastName,
         Property.Age

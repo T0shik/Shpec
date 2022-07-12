@@ -12,7 +12,7 @@ public class structs : IUseCase
 }
 public partial struct ExampleStruct
 {
-    Properties _p => new(
+    Members _p => new(
         Property.FirstName,
         Property.LastName
     );

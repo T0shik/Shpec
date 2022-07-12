@@ -6,7 +6,7 @@ namespace Playground.UseCases;
 
 public partial class type_coverage : IUseCase
 {
-    Properties _p =>
+    Members _p =>
         new(
             Boole4n,
             Short,

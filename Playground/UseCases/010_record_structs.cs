@@ -12,7 +12,7 @@ public class record_structs : IUseCase
 }
 public partial record struct RecordStruct
 {
-    private Properties _p => new(
+    private Members _p => new(
         Property.FirstName,
         Property.LastName
     );

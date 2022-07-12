@@ -1,8 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Immutable;
-using System.Collections.ObjectModel;
 using Shpec.Generators.Utils;
 
 namespace Shpec.Generators.Aggregators;
@@ -32,17 +30,14 @@ class PropertyDeclarationsAggregate : ISyntaxReceiver
 
     private void AddSimple(InvocationExpressionSyntax invocationExpressionSyntax)
     {
-        var propertyDeclarationSyntax = invocationExpressionSyntax
-            .GetParent<PropertyDeclarationSyntax>();
-
-        var identifier = propertyDeclarationSyntax.Identifier.ToString();
-        var type = propertyDeclarationSyntax.Type switch
+        var (identifier, typeSyntax) = GetDeclaration();
+        var type = typeSyntax switch
         {
             PredefinedTypeSyntax a => a.Keyword.Text,
             IdentifierNameSyntax a => a.Identifier.Text,
             QualifiedNameSyntax a => a.ToString(),
             ArrayTypeSyntax a => a.ToString(),
-            _ => throw new ShpecAggregationException("unsupported property declaration", propertyDeclarationSyntax),
+            _ => throw new ShpecAggregationException("unsupported property declaration", invocationExpressionSyntax.GetParent<MemberDeclarationSyntax>()),
         };
 
         bool HasArgument(string arg) => invocationExpressionSyntax.ArgumentList.Arguments.Any(x => x.NameColon.Name.Identifier.Text == arg);
@@ -50,6 +45,33 @@ class PropertyDeclarationsAggregate : ISyntaxReceiver
         var immutable = HasArgument("immutable");
 
         Declarations.Add(new(identifier, type, ImmutableArray<AdHocValidation>.Empty, immutable));
+
+        (string Identifier, TypeSyntax Type) GetDeclaration()
+        {
+            var propertyDeclarationSyntax = invocationExpressionSyntax
+                .TryGetParent<PropertyDeclarationSyntax>();
+
+            if (propertyDeclarationSyntax != null)
+            {
+                return (propertyDeclarationSyntax.Identifier.ToString(), propertyDeclarationSyntax.Type);
+            }
+
+            var fieldDeclarationSyntax = invocationExpressionSyntax
+                .TryGetParent<FieldDeclarationSyntax>();
+
+            if (fieldDeclarationSyntax != null)
+            {
+                var identifier = fieldDeclarationSyntax.Declaration
+                    .Variables
+                    .Single()
+                    .Identifier
+                    .ToString();
+
+                return (identifier, fieldDeclarationSyntax.Declaration.Type);
+            }
+
+            throw new ShpecAggregationException("unsupported property declaration", invocationExpressionSyntax.GetParent<MemberDeclarationSyntax>());
+        }
     }
 
     private void AddFrom(InvocationExpressionSyntax invocationExpressionSyntax)

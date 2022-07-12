@@ -4,7 +4,7 @@ namespace Playground.UseCases;
 
 public partial class init_props : IUseCase
 {
-    Properties _p => new(
+    Members _p => new(
         Props.Name,
         Props.Score,
         Props.Active

@@ -4,7 +4,7 @@ namespace Playground.UseCases;
 
 public partial class computed_property : IUseCase
 {
-    Properties _p => new(
+    Members _p => new(
             Property.FirstName,
             Property.LastName,
             Property.Age,

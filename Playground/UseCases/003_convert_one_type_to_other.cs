@@ -6,7 +6,7 @@ public partial class convert_one_type_to_other : IUseCase
 {
     public partial class PersonOne
     {
-        Properties _p => new(
+        Members _p => new(
             Property.FirstName,
             Property.LastName,
             Property.Age
@@ -15,7 +15,7 @@ public partial class convert_one_type_to_other : IUseCase
 
     public partial class PersonTwo
     {
-        Properties _p => new(
+        Members _p => new(
             Property.FirstName,
             Property.LastName,
             Computed.FullName
@@ -33,7 +33,7 @@ public partial class convert_dog_to_cat : IUseCase
 {
     public partial class Dog
     {
-        Properties _p => new(
+        Members _p => new(
             Property.FirstName,
             Property.Colour,
             Property.Size
@@ -42,7 +42,7 @@ public partial class convert_dog_to_cat : IUseCase
 
     public partial class Cat
     {
-        Properties _p => new(
+        Members _p => new(
             Property.Colour,
             Property.Size,
             Computed.PrintSizeAndColour

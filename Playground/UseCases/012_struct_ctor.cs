@@ -4,7 +4,7 @@ namespace Playground.UseCases;
 
 public partial struct struct_ctor : IUseCase
 {
-    Properties _p => new(
+    Members _p => new(
         Property.FirstName,
         Property.LastName,
         Property.Age

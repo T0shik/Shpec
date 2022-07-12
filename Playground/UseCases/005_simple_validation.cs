@@ -43,7 +43,7 @@ public class simple_validation : IUseCase
 
 public partial class SomeEntity
 {
-    Properties _p => new(
+    Members _p => new(
         ValidatedProperty.Positive,
         ValidatedProperty.Negative,
         ValidatedProperty.PositiveOrZero,

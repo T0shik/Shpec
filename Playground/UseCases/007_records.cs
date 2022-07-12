@@ -12,7 +12,7 @@ public class records : IUseCase
 }
 public partial record ExampleRecord
 {
-    private Properties _p => new(
+    private Members _p => new(
         Property.FirstName,
         Property.LastName
     );

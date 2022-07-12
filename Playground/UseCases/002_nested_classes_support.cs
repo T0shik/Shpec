@@ -11,7 +11,7 @@ public partial class nested_classes_support : IUseCase
 
     public partial class Person
     {
-        Properties _p => new(
+        Members _p => new(
                 Property.FirstName,
                 Property.LastName,
                 Property.Age

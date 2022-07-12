@@ -59,9 +59,11 @@ public class Property<T> : Member
 
 public class Computed<T> : Property<T> { }
 
-public class Properties
+public class Method : Member {}
+
+public class Members
 {
-    public Properties(params object[] members) { }
+    public Members(params object[] members) { }
 }
 
 public static class ValidationExtensions
