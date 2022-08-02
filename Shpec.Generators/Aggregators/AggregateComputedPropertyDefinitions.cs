@@ -6,9 +6,9 @@ using Shpec.Generators.Utils;
 
 namespace Shpec.Generators.Aggregators;
 
-class ComputedPropertyDeclarationsAggregate : ISyntaxReceiver
+class AggregateComputedPropertyDefinitions : ISyntaxReceiver
 {
-    public List<ComputedPropertyDefinition> Declarations { get; set; } = new();
+    public List<ComputedPropertyDefinition> Captures { get; set; } = new();
 
     public void OnVisitSyntaxNode(SyntaxNode syntaxNode)
     {
@@ -28,7 +28,7 @@ class ComputedPropertyDeclarationsAggregate : ISyntaxReceiver
         var type = predefinedTypeSyntax.Keyword.Text;
         var argument = invocation.ArgumentList.Arguments.First();
 
-        Declarations.Add(
+        Captures.Add(
             new ComputedPropertyDefinition(
                 identifier,
                 type,

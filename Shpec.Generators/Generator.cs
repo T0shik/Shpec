@@ -1,7 +1,9 @@
 ﻿using System.Collections.Immutable;
 using System.Security.Cryptography;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Shpec.Generators.Functions;
+using Shpec.Generators.SyntaxTemplates;
 using static Shpec.Generators.Utils.Ops;
 
 namespace Shpec.Generators;
@@ -16,16 +18,18 @@ public class SchemaGenerator : ISourceGenerator
             throw new ArgumentNullException(nameof(SyntaxReceiver));
         }
 
-        var propertyDeclarations = syntaxReceiver.propertyDeclarations.Declarations;
-        var computedProperties = syntaxReceiver.computedPropertyDeclarations.Declarations;
+        var propertyDeclarations = syntaxReceiver.AggregatePropertyDefinitions.Captures;
+        var computedProperties = syntaxReceiver.AggregateComputedPropertyDefinitions.Captures;
+        var methods = syntaxReceiver.AggregateMethodDefinitions.Captures;
 
         var addImplicitConversions = new AddImplicitConversion(propertyDeclarations);
-        var transformFactory = new TransformFactory(propertyDeclarations);
-        var transformComputedPropertyExpression = transformFactory.TransformComputedPropertyExpression();
+        var transformFactory = new TransformFactory(propertyDeclarations, computedProperties);
+        var transformComputedPropertyExpression = transformFactory.PropertyExpressionTransformer();
+        var statementTransformer = transformFactory.StatementTransformer();
 
-        var namespaceSeeds = syntaxReceiver.Declarations.Select(declaration =>
+        var namespaceSeeds = syntaxReceiver.Usages.Select(declaration =>
         {
-            IReadOnlyCollection<PropertySeed> properties = declaration.Members.Select(x =>
+            IReadOnlyCollection<Seed> members = declaration.Members.Select<string, Seed>(x =>
                 {
                     var propertyDefinition = propertyDeclarations.FirstOrDefault(d => d.Identifier == x);
                     if (propertyDefinition != null)
@@ -52,6 +56,15 @@ public class SchemaGenerator : ISourceGenerator
                         );
                     }
 
+                    if (methods.ContainsKey(x))
+                    {
+                        var block = (BlockSyntax) statementTransformer.Transform(methods[x].Body);
+                        
+                        return new MethodSeed(
+                            MethodTemplate.Transform(methods[x], block)
+                            );
+                    }
+
                     throw new($"Failed to find declaration for {x} of {declaration.Class.Identifier}");
                 })
                 .ToList()
@@ -61,14 +74,14 @@ public class SchemaGenerator : ISourceGenerator
                 declaration.Class.Identifier,
                 declaration.Class.Accessibility,
                 BuildParents(declaration.Class.Parent),
-                properties,
+                members,
                 ImmutableArray<ConversionSeed>.Empty,
                 declaration.Class.Static,
                 declaration.Class.Record,
                 declaration.Class.Struct
             );
             
-            var usings = DetermineUsings.From(properties);
+            var usings = DetermineUsings.From(members);
             
             return new NamespaceSeed(declaration.Namespace, classSeed, usings);
         }).ToList().AsReadOnly();

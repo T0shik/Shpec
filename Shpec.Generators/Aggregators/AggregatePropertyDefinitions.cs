@@ -5,9 +5,9 @@ using Shpec.Generators.Utils;
 
 namespace Shpec.Generators.Aggregators;
 
-class PropertyDeclarationsAggregate : ISyntaxReceiver
+class AggregatePropertyDefinitions : ISyntaxReceiver
 {
-    public List<PropertyDefinition> Declarations { get; set; } = new();
+    public List<PropertyDefinition> Captures { get; set; } = new();
 
     public void OnVisitSyntaxNode(SyntaxNode syntaxNode)
     {
@@ -44,7 +44,7 @@ class PropertyDeclarationsAggregate : ISyntaxReceiver
 
         var immutable = HasArgument("immutable");
 
-        Declarations.Add(new(identifier, type, ImmutableArray<AdHocValidation>.Empty, immutable));
+        Captures.Add(new(identifier, type, ImmutableArray<AdHocValidation>.Empty, immutable));
 
         (string Identifier, TypeSyntax Type) GetDeclaration()
         {
@@ -124,6 +124,6 @@ class PropertyDeclarationsAggregate : ISyntaxReceiver
         var identifier = propertyDeclarationSyntax.Identifier.ToString();
         var type = predefinedTypeSyntax.Keyword.Text;
 
-        Declarations.Add(new(identifier, type, validation.AsReadOnly(), false));
+        Captures.Add(new(identifier, type, validation.AsReadOnly(), false));
     }
 }

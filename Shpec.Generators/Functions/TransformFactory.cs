@@ -2,20 +2,19 @@
 
 internal class TransformFactory
 {
-    private List<PropertyDefinition> _propertyDefinitions;
-    
-    public TransformFactory(List<PropertyDefinition> propertyDefinitions)
+    private readonly List<PropertyDefinition> _propertyDefinitions;
+    private readonly List<ComputedPropertyDefinition> _computedPropertyDefinitions;
+
+    public TransformFactory(
+        List<PropertyDefinition> propertyDefinitions, 
+        List<ComputedPropertyDefinition> computedPropertyDefinitions
+        )
     {
         _propertyDefinitions = propertyDefinitions;
+        _computedPropertyDefinitions = computedPropertyDefinitions;
     }
 
-    internal TransformStatements TransformStatements()
-    {
-        return new TransformStatements(this);
-    }
+    internal StatementTransformer StatementTransformer() => new(this);
 
-    internal TransformExpression TransformComputedPropertyExpression()
-    {
-        return new TransformExpression(this, _propertyDefinitions);
-    }
+    internal PropertyExpressionTransformer PropertyExpressionTransformer() => new(this, _propertyDefinitions, _computedPropertyDefinitions);
 }

@@ -15,9 +15,14 @@ record PropertyDefinition(
     bool Immutable
 );
 
-record ComputedPropertyDefinition(string Identifier, string Type, IReadOnlyCollection<BaseValidation> Validation, ExpressionSyntax Expression);
+record ComputedPropertyDefinition(
+    string Identifier,
+    string Type,
+    IReadOnlyCollection<BaseValidation> Validation,
+    ExpressionSyntax Expression
+);
 
-record Declaration(string Namespace, ClassDeclaration Class, IEnumerable<string> Members);
+record Usage(string Namespace, ClassDeclaration Class, IEnumerable<string> Members);
 
 record ClassDeclaration(
     string Identifier,
@@ -43,6 +48,8 @@ record PropertySeed(
 
 record ComputedPropertySeed(string Identifier, string Type, IReadOnlyCollection<ValidationSeed> Validations, ExpressionSyntax Expression)
     : PropertySeed(Identifier, Type, Validations, true);
+
+record MethodSeed(MemberDeclarationSyntax Syntax) : Seed;
 
 record ConversionSeed(NamespaceSeed Target, NamespaceSeed From, IReadOnlyCollection<string> Properties);
 

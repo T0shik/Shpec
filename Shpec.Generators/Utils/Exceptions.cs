@@ -9,3 +9,10 @@ public class ShpecAggregationException : Exception
     {
     }
 }
+
+public class ShpecGenerationException : Exception
+{
+    public ShpecGenerationException(string message) : base(message)
+    {
+    }
+}

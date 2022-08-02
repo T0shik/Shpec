@@ -5,7 +5,7 @@ using Microsoft.VisualBasic.CompilerServices;
 
 namespace Shpec;
 
-public partial class Member
+public struct Member
 {
     public static readonly Member Default = new();
     public static implicit operator bool(Member p) => default;
@@ -51,19 +51,28 @@ public static class Declare
     public static Computed<T> _computed<T>(object o) => new();
 }
 
-public class Property<T> : Member
+public struct Property<T>
 {
     public static T must(Func<T, bool> predicate) => default;
     public static implicit operator T(Property<T> T) => default;
+    public static implicit operator Member(Property<T> x) => Member.Default;
 }
 
-public class Computed<T> : Property<T> { }
+public struct Computed<T>
+{
+    public static implicit operator Member(Computed<T> x) => Member.Default;
+}
 
-public class Method : Member {}
+public class MethodDefinitionAttribute : Attribute
+{
+    
+}
 
 public class Members
 {
-    public Members(params object[] members) { }
+    public Members(params object[] members)
+    {
+    }
 }
 
 public static class ValidationExtensions

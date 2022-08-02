@@ -1,6 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Shpec.Generators.Utils;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Shpec.Generators.SyntaxTemplates;
@@ -55,7 +56,8 @@ class ClassTemplate
                 ComputedPropertySeed cps => ComputedPropertyTemplate.Create(cps),
                 PropertySeed ps => new() { PropertyTemplate.Create(ps) },
                 ClassSeed cs => new() { Create(cs) },
-                _ => throw new NotImplementedException("Unhandled Seed."),
+                MethodSeed ms => new() { ms.Syntax },
+                _ => throw new ShpecGenerationException($"Unhandled Seed in ClassTemplate.CreateClassDeclaration. Seed: {x}"),
             })
         );
 

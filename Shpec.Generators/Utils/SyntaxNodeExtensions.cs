@@ -43,4 +43,24 @@ public static class SyntaxNodeExtensions
             parent = parent.Parent;
         }
     }
+    
+    public static T? FindChild<T>(this SyntaxNode @this)
+        where T : SyntaxNode
+    {
+        foreach (var child in @this.ChildNodes())
+        {
+            if (child is T x)
+            {
+                return x;
+            }
+
+            var nested = child.FindChild<T>();
+            if (nested != null)
+            {
+                return nested;
+            }
+        }
+
+        return null;
+    }
 }

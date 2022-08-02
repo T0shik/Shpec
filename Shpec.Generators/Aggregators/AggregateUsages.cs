@@ -7,9 +7,9 @@ using Shpec.Generators.Utils;
 
 namespace Shpec.Generators.Aggregators;
 
-class DefinitionsAggregate : ISyntaxReceiver
+class AggregateUsages : ISyntaxReceiver
 {
-    public readonly Dictionary<string, Declaration> Definitions = new();
+    public readonly Dictionary<string, Usage> Captures = new();
 
     public void OnVisitSyntaxNode(SyntaxNode syntaxNode)
     {
@@ -24,14 +24,14 @@ class DefinitionsAggregate : ISyntaxReceiver
         var ns = namespaceDeclaration.Name.ToString();
 
         var key = $"{ns}.{clazz}";
-        if (Definitions.ContainsKey(key))
+        if (Captures.ContainsKey(key))
         {
-            var d = Definitions[key];
-            Definitions[key] = d with { Members = d.Members.Concat(propertyNames) };
+            var d = Captures[key];
+            Captures[key] = d with { Members = d.Members.Concat(propertyNames) };
         }
         else
         {
-            Definitions[key] = new(ns, clazz, propertyNames);
+            Captures[key] = new(ns, clazz, propertyNames);
         }
     }
 

@@ -5,15 +5,21 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Shpec.Generators.Functions;
 
-internal class TransformExpression
+internal class PropertyExpressionTransformer
 {
     private readonly TransformFactory _factory;
     private readonly List<PropertyDefinition> _propertyDefinitions;
+    private readonly List<ComputedPropertyDefinition> _computedPropertyDefinitions;
 
-    public TransformExpression(TransformFactory factory, List<PropertyDefinition> propertyDefinitions)
+    public PropertyExpressionTransformer(
+        TransformFactory factory,
+        List<PropertyDefinition> propertyDefinitions,
+        List<ComputedPropertyDefinition> computedPropertyDefinitions
+    )
     {
         _factory = factory;
         _propertyDefinitions = propertyDefinitions;
+        _computedPropertyDefinitions = computedPropertyDefinitions;
     }
 
     public ExpressionSyntax Transform(ExpressionSyntax exp) => exp switch
@@ -28,8 +34,8 @@ internal class TransformExpression
     };
 
     private ExpressionSyntax Transform(BinaryExpressionSyntax exp) => exp
-            .WithLeft(Transform(exp.Left))
-            .WithRight(Transform(exp.Right));
+        .WithLeft(Transform(exp.Left))
+        .WithRight(Transform(exp.Right));
 
     private ExpressionSyntax Transform(InterpolatedStringExpressionSyntax exp)
     {
@@ -48,7 +54,7 @@ internal class TransformExpression
 
     private ExpressionSyntax Transform(ParenthesizedLambdaExpressionSyntax exp)
     {
-        var tr = _factory.TransformStatements();
+        var tr = _factory.StatementTransformer();
         var b = exp.Block;
         if (b == null)
         {
@@ -58,8 +64,8 @@ internal class TransformExpression
         return exp.WithBlock(
             b.WithStatements(
                 new SyntaxList<StatementSyntax>(b.Statements.Select(tr.Transform))
-                )
-            );
+            )
+        );
     }
 
     // todo: tranform expressions inside Bracketed Argument List 
@@ -68,12 +74,8 @@ internal class TransformExpression
 
     private ExpressionSyntax Transform(MemberAccessExpressionSyntax exp)
     {
-        var property = exp.Kind() switch
-        {
-            SyntaxKind.SimpleMemberAccessExpression => _propertyDefinitions.FirstOrDefault(p => p.Identifier.ToString() == exp.Name.ToString()),
-            _ => throw new NotImplementedException("TransformComputedPropertyExpression BinaryExpressionSyntax GetKnownProperty unsupported MemberAccessExpressionSyntax kind.")
-        };
-
+        var property = MatchingMember();
+        
         if (property == null)
         {
             if (exp.Expression is MemberAccessExpressionSyntax next)
@@ -84,6 +86,20 @@ internal class TransformExpression
             return exp;
         }
 
-        return IdentifierName(property.Identifier);
+        return IdentifierName(property);
+
+        string? MatchingMember()
+        {
+            var memberName = exp.Name.ToString();
+            var match = _propertyDefinitions.FirstOrDefault(p => p.Identifier == memberName)?.Identifier;
+
+            if (match != null)
+            {
+                return match;
+            }
+
+            match = _computedPropertyDefinitions.FirstOrDefault(p => p.Identifier == memberName)?.Identifier;
+            return match;
+        }
     }
 }

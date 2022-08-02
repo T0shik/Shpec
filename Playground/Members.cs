@@ -18,11 +18,20 @@ public class Computed
 {
     public static int BirthYear => _computed(DateTime.UtcNow.Year - Property.Age);
     public static string FullName => _computed($"{Property.FirstName} {Property.LastName}");
-    public static string PrintSizeAndColour => _computed($"Cat afd size: {Property.Size} and colour: {Property.Colour}");
+    public static string PrintSizeAndColour => _computed($"size: {Property.Size} and colour: {Property.Colour}");
     public static string Initials => _computed(() =>
     {
         var fn = Property.FirstName[0];
         var ln = Property.LastName[0];
         return $"{fn}.{ln}.";
     });
+}
+
+public class Methods
+{
+    [MethodDefinition]
+    public static void IncrementAge()
+    {
+        Property.Age += 1;
+    }
 }

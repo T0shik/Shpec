@@ -6,11 +6,11 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Shpec.Generators.Functions;
 
-internal class TransformStatements
+internal class StatementTransformer
 {
     private readonly TransformFactory _transformFactory;
 
-    public TransformStatements(TransformFactory transformFactory)
+    public StatementTransformer(TransformFactory transformFactory)
     {
         _transformFactory = transformFactory;
     }
@@ -23,7 +23,7 @@ internal class TransformStatements
 
     public StatementSyntax Transform(LocalDeclarationStatementSyntax st)
     {
-        var transformer = _transformFactory.TransformComputedPropertyExpression();
+        var transformer = _transformFactory.PropertyExpressionTransformer();
         var variables = st.Declaration.Variables
             .Select(v =>
             {
