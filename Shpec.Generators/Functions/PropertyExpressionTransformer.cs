@@ -1,5 +1,4 @@
 ﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -30,8 +29,13 @@ internal class PropertyExpressionTransformer
 
         ElementAccessExpressionSyntax a => Transform(a),
         MemberAccessExpressionSyntax a => Transform(a),
+        AssignmentExpressionSyntax a => TransformAssignmentExpressionSyntax(a),
         _ => exp
     };
+
+    private ExpressionSyntax TransformAssignmentExpressionSyntax(AssignmentExpressionSyntax aes) =>
+        aes.WithLeft(Transform(aes.Left))
+            .WithRight(Transform(aes.Right));
 
     private ExpressionSyntax Transform(BinaryExpressionSyntax exp) => exp
         .WithLeft(Transform(exp.Left))

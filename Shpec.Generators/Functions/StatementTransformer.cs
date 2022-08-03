@@ -1,7 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 
 namespace Shpec.Generators.Functions;
@@ -15,13 +13,16 @@ internal class StatementTransformer
         _transformFactory = transformFactory;
     }
 
-    public StatementSyntax Transform(StatementSyntax st) => st switch
-    {
-        LocalDeclarationStatementSyntax a => Transform(a),
-        _ => st
-    };
+    public StatementSyntax Transform(StatementSyntax st) =>
+        st switch
+        {
+            BlockSyntax e => TransformBlockSyntax(e),
+            LocalDeclarationStatementSyntax a => TransformLocalDeclarationStatementSyntax(a),
+            ExpressionStatementSyntax e => TransformExpressionStatementSyntax(e),
+            _ => st
+        };
 
-    public StatementSyntax Transform(LocalDeclarationStatementSyntax st)
+    private StatementSyntax TransformLocalDeclarationStatementSyntax(LocalDeclarationStatementSyntax st)
     {
         var transformer = _transformFactory.PropertyExpressionTransformer();
         var variables = st.Declaration.Variables
@@ -31,8 +32,8 @@ internal class StatementTransformer
 
                 var vv = transformer.Transform(i.Value);
                 return v.WithInitializer(
-                        i.WithValue(vv)
-                    );
+                    i.WithValue(vv)
+                );
             }).ToList();
 
 
@@ -42,9 +43,42 @@ internal class StatementTransformer
         }
 
         return st.WithDeclaration(
-                st.Declaration.WithVariables(
-                    new SeparatedSyntaxList<VariableDeclaratorSyntax>().AddRange(variables)
-                )
-            );
+            st.Declaration.WithVariables(
+                new SeparatedSyntaxList<VariableDeclaratorSyntax>().AddRange(variables)
+            )
+        );
     }
+    
+    /// <summary>
+    /// Intended to transform expression statements
+    ///
+    ///    void Method()
+    ///    {
+    ///        // expression statement
+    ///        var a = 5;
+    ///    }
+    /// 
+    /// </summary>
+    /// <param name="ess">expression statement</param>
+    /// <returns>transformed expression statement</returns>
+    private StatementSyntax TransformExpressionStatementSyntax(ExpressionStatementSyntax ess) =>
+        ess.WithExpression(
+            _transformFactory.PropertyExpressionTransformer().Transform(ess.Expression)
+        );
+    
+    /// <summary>
+    /// Intended to transform statements in the method body
+    ///
+    ///    void Method()
+    ///    {
+    ///        ...statements_to_transform 
+    ///    }
+    /// 
+    /// </summary>
+    /// <param name="bs">method body</param>
+    /// <returns>transformed method body</returns>
+    private StatementSyntax TransformBlockSyntax(BlockSyntax bs) =>
+        bs.WithStatements(
+            new(bs.Statements.Select(Transform))
+        );
 }
