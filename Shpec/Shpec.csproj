@@ -1,12 +1,27 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFramework>net6.0</TargetFramework>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<Nullable>enable</Nullable>
-		<LangVersion>10</LangVersion>
-		<PackageId>Shpec</PackageId>
-		<Version>0.0.1-beta01</Version>
-	</PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <LangVersion>10</LangVersion>
+        
+        <PackageId>Shpec</PackageId>
+        <Version>0.0.1-beta01</Version>
+        <Description>inheritence à la carte</Description>
+        <Authors>Anton Wieslander</Authors>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Shpec.Generator\Shpec.Generator.csproj" Pack="false">
+            <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+            <OutputItemType>Content</OutputItemType>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </ProjectReference>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="$(OutputPath)\$(AssemblyName).Generator.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+    </ItemGroup>
 
 </Project>

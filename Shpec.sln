@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shpec", "Shpec\Shpec.csproj
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Playground", "Playground\Playground.csproj", "{718341EE-F119-477B-B317-A58EF82E7938}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shpec.Generators", "Shpec.Generators\Shpec.Generators.csproj", "{56C05398-0719-4DD6-8030-79577A4796EC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shpec.Generator", "Shpec.Generator\Shpec.Generator.csproj", "{56C05398-0719-4DD6-8030-79577A4796EC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

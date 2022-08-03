@@ -1,7 +1,6 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using System.Numerics;
-using Microsoft.VisualBasic.CompilerServices;
 
 namespace Shpec;
 
