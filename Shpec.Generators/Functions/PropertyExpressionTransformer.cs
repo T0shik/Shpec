@@ -68,7 +68,6 @@ internal class PropertyExpressionTransformer
         );
     }
 
-    // todo: tranform expressions inside Bracketed Argument List 
     private ExpressionSyntax Transform(ElementAccessExpressionSyntax exp) =>
         exp.WithExpression(Transform(exp.Expression));
 
