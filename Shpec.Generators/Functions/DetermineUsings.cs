@@ -6,7 +6,7 @@ internal static class DetermineUsings
 {
     internal static IReadOnlyCollection<string> From(IReadOnlyCollection<Seed> properties)
     {
-        List<string> result = new();
+        HashSet<string> result = new();
 
         foreach (var p in properties.OfType<PropertySeed>())
         {
@@ -14,9 +14,13 @@ internal static class DetermineUsings
             {
                 result.Add("System.Numerics");
             }
+            else if (p.Type == nameof(Guid))
+            {
+                result.Add("System");
+            }
         }
 
 
-        return result.AsReadOnly();
+        return result.ToList().AsReadOnly();
     }
 }

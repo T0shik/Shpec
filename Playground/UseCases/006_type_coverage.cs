@@ -18,6 +18,7 @@ public partial class type_coverage : IUseCase
             Flo,
             Dub,
             Dec,
+            Gu1d,
             BigInt,
             BigIntQual,
             Chr,
@@ -36,6 +37,7 @@ public partial class type_coverage : IUseCase
             FloArr,
             DubArr,
             DecArr,
+            Gu1dArr,
             BigIntArr,
             BigIntQualArr,
             ChrArr,
@@ -58,6 +60,7 @@ public partial class type_coverage : IUseCase
         static float Flo => _property();
         static double Dub => _property();
         static decimal Dec => _property();
+        static Guid Gu1d => _property();
         static BigInteger BigInt => _property();
         static System.Numerics.BigInteger BigIntQual => _property();
         static char Chr => _property();
@@ -76,6 +79,7 @@ public partial class type_coverage : IUseCase
         static double[] DubArr => _property();
         static decimal[] DecArr => _property();
         static BigInteger[] BigIntArr => _property();
+        static Guid[] Gu1dArr => _property();
         static System.Numerics.BigInteger[] BigIntQualArr => _property();
         static char[] ChrArr => _property();
         static string[] StrArr => _property();
@@ -99,6 +103,7 @@ public partial class type_coverage : IUseCase
             Flo = 0,
             Dub = 0,
             Dec = 0,
+            Gu1d = Guid.Empty,
             BigInt = 0,
             BigIntQual = 0,
             Chr = 'a',
@@ -116,6 +121,7 @@ public partial class type_coverage : IUseCase
             FloArr = Array.Empty<float>(),
             DubArr = Array.Empty<double>(),
             DecArr = Array.Empty<decimal>(),
+            Gu1dArr = Array.Empty<Guid>(),
             BigIntArr = Array.Empty<BigInteger>(),
             BigIntQualArr = Array.Empty<BigInteger>(),
             ChrArr = Array.Empty<char>(),

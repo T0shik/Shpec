@@ -16,7 +16,7 @@ public partial class method : IUseCase
 
         if (m.Age != 11)
         {
-            throw new("failed to increment");
+            throw new($"failed to increment age: {m.Age}");
         }
     }
 }

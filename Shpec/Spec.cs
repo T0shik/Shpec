@@ -18,6 +18,7 @@ public struct Member
     public static implicit operator float(Member p) => 0;
     public static implicit operator double(Member p) => 0;
     public static implicit operator decimal(Member p) => 0;
+    public static implicit operator Guid(Member p) => Guid.Empty;
     public static implicit operator BigInteger(Member p) => 0;
     public static implicit operator char(Member p) => char.MinValue;
     public static implicit operator string(Member p) => string.Empty;
@@ -34,6 +35,7 @@ public struct Member
     public static implicit operator float[](Member p) => Array.Empty<float>();
     public static implicit operator double[](Member p) => Array.Empty<double>();
     public static implicit operator decimal[](Member p) => Array.Empty<decimal>();
+    public static implicit operator Guid[](Member p) => Array.Empty<Guid>();
     public static implicit operator BigInteger[](Member p) => Array.Empty<BigInteger>();
     public static implicit operator char[](Member p) => Array.Empty<char>();
     public static implicit operator string[](Member p) => Array.Empty<string>();
@@ -65,7 +67,6 @@ public struct Computed<T>
 
 public class MethodDefinitionAttribute : Attribute
 {
-    
 }
 
 public class Members

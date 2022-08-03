@@ -5,6 +5,8 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<LangVersion>10</LangVersion>
+		<PackageId>Shpec</PackageId>
+		<Version>0.0.1-beta01</Version>
 	</PropertyGroup>
 
 </Project>
