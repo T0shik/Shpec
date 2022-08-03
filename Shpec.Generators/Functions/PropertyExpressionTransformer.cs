@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -21,25 +22,27 @@ internal class PropertyExpressionTransformer
         _computedPropertyDefinitions = computedPropertyDefinitions;
     }
 
-    public ExpressionSyntax Transform(ExpressionSyntax exp) => exp switch
-    {
-        BinaryExpressionSyntax a => Transform(a),
-        InterpolatedStringExpressionSyntax a => Transform(a),
-        ParenthesizedLambdaExpressionSyntax a => Transform(a),
+    public ExpressionSyntax Transform(ExpressionSyntax exp) =>
+        exp switch
+        {
+            BinaryExpressionSyntax a => Transform(a),
+            InterpolatedStringExpressionSyntax a => Transform(a),
+            ParenthesizedLambdaExpressionSyntax a => Transform(a),
 
-        ElementAccessExpressionSyntax a => Transform(a),
-        MemberAccessExpressionSyntax a => Transform(a),
-        AssignmentExpressionSyntax a => TransformAssignmentExpressionSyntax(a),
-        _ => exp
-    };
+            ElementAccessExpressionSyntax a => Transform(a),
+            MemberAccessExpressionSyntax a => TransformMemberAccessExpressionSyntax(a),
+            AssignmentExpressionSyntax a => TransformAssignmentExpressionSyntax(a),
+            _ => exp
+        };
 
     private ExpressionSyntax TransformAssignmentExpressionSyntax(AssignmentExpressionSyntax aes) =>
         aes.WithLeft(Transform(aes.Left))
             .WithRight(Transform(aes.Right));
 
-    private ExpressionSyntax Transform(BinaryExpressionSyntax exp) => exp
-        .WithLeft(Transform(exp.Left))
-        .WithRight(Transform(exp.Right));
+    private ExpressionSyntax Transform(BinaryExpressionSyntax exp) =>
+        exp
+            .WithLeft(Transform(exp.Left))
+            .WithRight(Transform(exp.Right));
 
     private ExpressionSyntax Transform(InterpolatedStringExpressionSyntax exp)
     {
@@ -72,13 +75,27 @@ internal class PropertyExpressionTransformer
         );
     }
 
-    private ExpressionSyntax Transform(ElementAccessExpressionSyntax exp) =>
-        exp.WithExpression(Transform(exp.Expression));
+    private ExpressionSyntax Transform(ElementAccessExpressionSyntax exp) => exp.WithExpression(Transform(exp.Expression));
 
-    private ExpressionSyntax Transform(MemberAccessExpressionSyntax exp)
+    /// <summary>
+    /// Intended for final translation of a declared property accessor.
+    ///
+    /// from:
+    ///    public void Method() {
+    ///        var age = Property.Age;
+    ///    }
+    /// 
+    /// to:
+    ///    public void Method() {
+    ///        var age = this.Age;
+    ///    }
+    /// </summary>
+    /// <param name="exp">declaration member access expression, example: Property.Age</param>
+    /// <returns>remapped object member accessor</returns>
+    private ExpressionSyntax TransformMemberAccessExpressionSyntax(MemberAccessExpressionSyntax exp)
     {
         var property = MatchingMember();
-        
+
         if (property == null)
         {
             if (exp.Expression is MemberAccessExpressionSyntax next)
@@ -89,7 +106,11 @@ internal class PropertyExpressionTransformer
             return exp;
         }
 
-        return IdentifierName(property);
+        return MemberAccessExpression(
+            SyntaxKind.SimpleMemberAccessExpression,
+            ThisExpression(),
+            IdentifierName(property)
+        );
 
         string? MatchingMember()
         {
