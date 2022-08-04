@@ -65,8 +65,8 @@ public partial class type_coverage : IUseCase
         static System.Numerics.BigInteger BigIntQual => _property();
         static char Chr => _property();
         static string Str => _property();
-        static TimeOnly T1me => _property();
-        static DateOnly D4te => _property();
+        static TimeOnly T1me => _property<TimeOnly>();
+        static DateOnly D4te => _property<DateOnly>();
         static DateTime D4teT1me => _property();
         static DateTimeOffset D4teT1meOffset => _property();
         static short[] ShortArr => _property();
@@ -83,8 +83,8 @@ public partial class type_coverage : IUseCase
         static System.Numerics.BigInteger[] BigIntQualArr => _property();
         static char[] ChrArr => _property();
         static string[] StrArr => _property();
-        static TimeOnly[] T1meArr => _property();
-        static DateOnly[] D4teArr => _property();
+        static TimeOnly[] T1meArr => _property<TimeOnly[]>();
+        static DateOnly[] D4teArr => _property<DateOnly[]>();
         static DateTime[] D4teT1meArr => _property();
         static DateTimeOffset[] D4teT1meOffsetArr => _property();
     }

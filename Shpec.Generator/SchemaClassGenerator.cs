@@ -24,9 +24,12 @@ class SchemaClassGenerator
                 QualifiedName(
                     QualifiedName(
                         IdentifierName("System"),
-                        IdentifierName("Collections")),
-                    IdentifierName("Immutable"))),
-            
+                        IdentifierName("Collections")
+                    ),
+                    IdentifierName("Generic")
+                )
+            ),
+
             UsingDirective(IdentifierName("Shpec")),
         };
 
@@ -34,7 +37,7 @@ class SchemaClassGenerator
         {
             usings.Add(UsingDirective(IdentifierName(usingSeed)));
         }
-        
+
 
         return CompilationUnit()
             .WithUsings(List(usings))

@@ -15,6 +15,10 @@ class AggregatePropertyDefinitions : ISyntaxReceiver
         {
             AddSimple(a);
         }
+        else if (syntaxNode is InvocationExpressionSyntax { Expression: GenericNameSyntax { Identifier.Text: "_property" } } e1)
+        {
+            AddSimple(e1);
+        } 
         else if (syntaxNode is InvocationExpressionSyntax { Expression: MemberAccessExpressionSyntax m } b)
         {
             if (m is { Expression: IdentifierNameSyntax { Identifier.Text: "Declare" }, Name: IdentifierNameSyntax { Identifier.Text: "_property" } })
@@ -106,10 +110,13 @@ class AggregatePropertyDefinitions : ISyntaxReceiver
             throw new Exception($"{gns.TypeArgumentList.Arguments}");
         }
 
-        if (typeSyntax is not PredefinedTypeSyntax predefinedTypeSyntax)
+        var type = typeSyntax switch
         {
-            throw new ShpecAggregationException("property is not pre-defined", invocationExpressionSyntax);
-        }
+            PredefinedTypeSyntax x => x.Keyword.Text,
+            IdentifierNameSyntax x => x.Identifier.Text,
+            _ => throw new ShpecAggregationException("failed to get property type", invocationExpressionSyntax),
+        };
+
 
         var validation = new List<BaseValidation>();
         var validationArgument = invocationExpressionSyntax.ArgumentList.Arguments.Single();
@@ -122,7 +129,6 @@ class AggregatePropertyDefinitions : ISyntaxReceiver
             .GetParent<PropertyDeclarationSyntax>();
 
         var identifier = propertyDeclarationSyntax.Identifier.ToString();
-        var type = predefinedTypeSyntax.Keyword.Text;
 
         Captures.Add(new(identifier, type, validation.AsReadOnly(), false));
     }

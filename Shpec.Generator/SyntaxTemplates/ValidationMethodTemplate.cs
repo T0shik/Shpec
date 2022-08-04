@@ -7,6 +7,8 @@ namespace Shpec.Generator.SyntaxTemplates;
 
 internal class ValidationMethodTemplate
 {
+    private const string ValidationAggregateName = "__validationResults";
+
     public static MemberDeclarationSyntax? Create(ClassSeed seed)
     {
         List<PropertySeed> properties = new();
@@ -45,6 +47,15 @@ internal class ValidationMethodTemplate
 
     public static LocalDeclarationStatementSyntax CreateResultsDeclaration()
     {
+        var validationAggregateInitializer = ObjectCreationExpression(
+            GenericName(Identifier("List"))
+                .WithTypeArgumentList(
+                    TypeArgumentList(
+                        SingletonSeparatedList<TypeSyntax>(
+                            IdentifierName("ValidationError")
+                        ))))
+                .WithArgumentList(ArgumentList());
+
         return LocalDeclarationStatement(
             VariableDeclaration(
                     IdentifierName(
@@ -57,22 +68,9 @@ internal class ValidationMethodTemplate
                 .WithVariables(
                     SingletonSeparatedList<VariableDeclaratorSyntax>(
                         VariableDeclarator(
-                                Identifier("builder"))
+                                Identifier(ValidationAggregateName))
                             .WithInitializer(
-                                EqualsValueClause(
-                                    InvocationExpression(
-                                        MemberAccessExpression(
-                                            SyntaxKind.SimpleMemberAccessExpression,
-                                            MemberAccessExpression(
-                                                SyntaxKind.SimpleMemberAccessExpression,
-                                                GenericName(
-                                                        Identifier("ImmutableArray"))
-                                                    .WithTypeArgumentList(
-                                                        TypeArgumentList(
-                                                            SingletonSeparatedList<TypeSyntax>(
-                                                                IdentifierName("ValidationError")))),
-                                                IdentifierName("Empty")),
-                                            IdentifierName("ToBuilder"))))))));
+                                EqualsValueClause(validationAggregateInitializer)))));
     }
 
     public static IfStatementSyntax CreatePropertyValidationStatements(PropertySeed propertySeed)
@@ -87,7 +85,7 @@ internal class ValidationMethodTemplate
                         InvocationExpression(
                                 MemberAccessExpression(
                                     SyntaxKind.SimpleMemberAccessExpression,
-                                    IdentifierName("builder"),
+                                    IdentifierName(ValidationAggregateName),
                                     IdentifierName("Add")))
                             .WithArgumentList(
                                 ArgumentList(
@@ -129,18 +127,19 @@ internal class ValidationMethodTemplate
                                 InvocationExpression(
                                     MemberAccessExpression(
                                         SyntaxKind.SimpleMemberAccessExpression,
-                                        IdentifierName("builder"),
-                                        IdentifierName("ToImmutableArray"))))))));
+                                        IdentifierName(ValidationAggregateName),
+                                        IdentifierName("AsReadOnly"))))))));
     }
 
     public static class TransformValidationExpression
     {
-        public static ExpressionSyntax From(ValidationSeed seed, PropertySeed property) => seed switch
-        {
-            AdHocValidationSeed { Expression: SimpleLambdaExpressionSyntax { ExpressionBody: BinaryExpressionSyntax be } } => Transform(be, property),
+        public static ExpressionSyntax From(ValidationSeed seed, PropertySeed property) =>
+            seed switch
+            {
+                AdHocValidationSeed { Expression: SimpleLambdaExpressionSyntax { ExpressionBody: BinaryExpressionSyntax be } } => Transform(be, property),
 
-            _ => throw new Exception($"{nameof(TransformValidationExpression.Transform)}: unsupported {seed} for {property}")
-        };
+                _ => throw new Exception($"{nameof(TransformValidationExpression.Transform)}: unsupported {seed} for {property}")
+            };
 
         private static ExpressionSyntax Transform(BinaryExpressionSyntax binaryExpression, PropertySeed property)
         {
@@ -171,17 +170,18 @@ internal class ValidationMethodTemplate
             throw new Exception($"{nameof(TransformValidationExpression.Transform)}: unsupported {binaryExpression} for {property}");
         }
 
-        private static SyntaxKind InvertArithmeticComparison(SyntaxKind comparison) => comparison switch
-        {
-            SyntaxKind.GreaterThanToken => SyntaxKind.LessThanOrEqualExpression,
-            SyntaxKind.GreaterThanEqualsToken => SyntaxKind.LessThanExpression,
+        private static SyntaxKind InvertArithmeticComparison(SyntaxKind comparison) =>
+            comparison switch
+            {
+                SyntaxKind.GreaterThanToken => SyntaxKind.LessThanOrEqualExpression,
+                SyntaxKind.GreaterThanEqualsToken => SyntaxKind.LessThanExpression,
 
-            SyntaxKind.LessThanToken => SyntaxKind.GreaterThanOrEqualExpression,
-            SyntaxKind.LessThanEqualsToken => SyntaxKind.GreaterThanExpression,
+                SyntaxKind.LessThanToken => SyntaxKind.GreaterThanOrEqualExpression,
+                SyntaxKind.LessThanEqualsToken => SyntaxKind.GreaterThanExpression,
 
-            SyntaxKind.EqualsEqualsToken => SyntaxKind.NotEqualsExpression,
-            SyntaxKind.ExclamationEqualsToken => SyntaxKind.EqualsExpression,
-            _ => throw new InvalidOperationException($"Unsupported SyntaxKind {comparison} for {nameof(InvertArithmeticComparison)}")
-        };
+                SyntaxKind.EqualsEqualsToken => SyntaxKind.NotEqualsExpression,
+                SyntaxKind.ExclamationEqualsToken => SyntaxKind.EqualsExpression,
+                _ => throw new InvalidOperationException($"Unsupported SyntaxKind {comparison} for {nameof(InvertArithmeticComparison)}")
+            };
     }
 }

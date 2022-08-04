@@ -1,5 +1,6 @@
 ﻿// ReSharper disable InconsistentNaming
 
+using System;
 using System.Numerics;
 
 namespace Shpec;
@@ -21,8 +22,6 @@ public struct Member
     public static implicit operator BigInteger(Member p) => 0;
     public static implicit operator char(Member p) => char.MinValue;
     public static implicit operator string(Member p) => string.Empty;
-    public static implicit operator TimeOnly(Member p) => TimeOnly.MinValue;
-    public static implicit operator DateOnly(Member p) => DateOnly.MinValue;
     public static implicit operator DateTime(Member p) => DateTime.MinValue;
     public static implicit operator DateTimeOffset(Member p) => DateTimeOffset.MinValue;
     public static implicit operator short[](Member p) => Array.Empty<short>();
@@ -38,8 +37,6 @@ public struct Member
     public static implicit operator BigInteger[](Member p) => Array.Empty<BigInteger>();
     public static implicit operator char[](Member p) => Array.Empty<char>();
     public static implicit operator string[](Member p) => Array.Empty<string>();
-    public static implicit operator TimeOnly[](Member p) => Array.Empty<TimeOnly>();
-    public static implicit operator DateOnly[](Member p) => Array.Empty<DateOnly>();
     public static implicit operator DateTime[](Member p) => Array.Empty<DateTime>();
     public static implicit operator DateTimeOffset[](Member p) => Array.Empty<DateTimeOffset>();
 }

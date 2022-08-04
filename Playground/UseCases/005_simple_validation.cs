@@ -23,7 +23,7 @@ public class simple_validation : IUseCase
             throw new Exception("not worky at all..");
         }
 
-        if (validationResult.Errors.Length != typeof(ValidatedProperty).GetProperties().Length)
+        if (validationResult.Errors.Count != typeof(ValidatedProperty).GetProperties().Length)
         {
             foreach (var error in validationResult.Errors)
             {

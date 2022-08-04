@@ -20,7 +20,6 @@ internal static class DetermineUsings
             }
         }
 
-
-        return result.ToList().AsReadOnly();
+        return result;
     }
 }
