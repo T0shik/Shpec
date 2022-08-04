@@ -19,7 +19,7 @@ public partial class init_props : IUseCase
 
 public class Props
 {
-    public static string Name => Declare._property(immutable: true);
-    public static int Score => Declare._property(immutable: true);
-    public static bool Active => Declare._property(immutable: true);
+    public static string Name => Member<string>.Property();
+    public static int Score => Member<int>.Property();
+    public static bool Active => Member<bool>.Property();
 }

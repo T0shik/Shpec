@@ -11,6 +11,11 @@ class AggregatePropertyDefinitions : ISyntaxReceiver
 
     public void OnVisitSyntaxNode(SyntaxNode syntaxNode)
     {
+        if (syntaxNode is MemberAccessExpressionSyntax { Expression: GenericNameSyntax { Identifier.Text: "Member" }, Name.Identifier.Text: "Property" })
+        {
+            AddSimple(syntaxNode.GetParent<InvocationExpressionSyntax>());
+        }
+        
         if (syntaxNode is InvocationExpressionSyntax { Expression: IdentifierNameSyntax { Identifier.Text: "_property" } } a)
         {
             AddSimple(a);

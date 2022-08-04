@@ -11,11 +11,13 @@ class AggregateComputedPropertyDefinitions : ISyntaxReceiver
 
     public void OnVisitSyntaxNode(SyntaxNode syntaxNode)
     {
-        if (syntaxNode is not InvocationExpressionSyntax { Expression: IdentifierNameSyntax { Identifier.Text: "_computed" } } invocation)
+        if (syntaxNode is not MemberAccessExpressionSyntax { Expression: GenericNameSyntax { Identifier.Text: "Member" }, Name.Identifier.Text: "Computed" } mae)
         {
             return;
         }
 
+        var invocation = mae.GetParent<InvocationExpressionSyntax>();
+        
         var propertyDeclarationSyntax = invocation
             .GetParent<PropertyDeclarationSyntax>();
 
