@@ -13,31 +13,11 @@ class AggregatePropertyDefinitions : ISyntaxReceiver
     {
         if (syntaxNode is MemberAccessExpressionSyntax { Expression: GenericNameSyntax { Identifier.Text: "Member" }, Name.Identifier.Text: "Property" })
         {
-            AddSimple(syntaxNode.GetParent<InvocationExpressionSyntax>());
-        }
-        
-        if (syntaxNode is InvocationExpressionSyntax { Expression: IdentifierNameSyntax { Identifier.Text: "_property" } } a)
-        {
-            AddSimple(a);
-        }
-        else if (syntaxNode is InvocationExpressionSyntax { Expression: GenericNameSyntax { Identifier.Text: "_property" } } e1)
-        {
-            AddSimple(e1);
-        } 
-        else if (syntaxNode is InvocationExpressionSyntax { Expression: MemberAccessExpressionSyntax m } b)
-        {
-            if (m is { Expression: IdentifierNameSyntax { Identifier.Text: "Declare" }, Name: IdentifierNameSyntax { Identifier.Text: "_property" } })
-            {
-                AddSimple(b);
-            }
-            else
-            {
-                AddFrom(b);
-            }
+            Add(syntaxNode.GetParent<InvocationExpressionSyntax>());
         }
     }
 
-    private void AddSimple(InvocationExpressionSyntax invocationExpressionSyntax)
+    private void Add(InvocationExpressionSyntax invocation)
     {
         var (identifier, typeSyntax) = GetDeclaration();
         var type = typeSyntax switch
@@ -46,18 +26,15 @@ class AggregatePropertyDefinitions : ISyntaxReceiver
             IdentifierNameSyntax a => a.Identifier.Text,
             QualifiedNameSyntax a => a.ToString(),
             ArrayTypeSyntax a => a.ToString(),
-            _ => throw new ShpecAggregationException("unsupported property declaration", invocationExpressionSyntax.GetParent<MemberDeclarationSyntax>()),
+            _ => throw new ShpecAggregationException("unsupported property declaration", invocation.GetParent<MemberDeclarationSyntax>()),
         };
 
-        bool HasArgument(string arg) => invocationExpressionSyntax.ArgumentList.Arguments.Any(x => x.NameColon.Name.Identifier.Text == arg);
-
-        var immutable = HasArgument("immutable");
-
-        Captures.Add(new(identifier, type, ImmutableArray<AdHocValidation>.Empty, immutable));
+        var validationRules = GetValidationRules(invocation).ToImmutableList();
+        Captures.Add(new(identifier, type, validationRules, false));
 
         (string Identifier, TypeSyntax Type) GetDeclaration()
         {
-            var propertyDeclarationSyntax = invocationExpressionSyntax
+            var propertyDeclarationSyntax = invocation
                 .TryGetParent<PropertyDeclarationSyntax>();
 
             if (propertyDeclarationSyntax != null)
@@ -65,7 +42,7 @@ class AggregatePropertyDefinitions : ISyntaxReceiver
                 return (propertyDeclarationSyntax.Identifier.ToString(), propertyDeclarationSyntax.Type);
             }
 
-            var fieldDeclarationSyntax = invocationExpressionSyntax
+            var fieldDeclarationSyntax = invocation
                 .TryGetParent<FieldDeclarationSyntax>();
 
             if (fieldDeclarationSyntax != null)
@@ -79,62 +56,32 @@ class AggregatePropertyDefinitions : ISyntaxReceiver
                 return (identifier, fieldDeclarationSyntax.Declaration.Type);
             }
 
-            throw new ShpecAggregationException("unsupported property declaration", invocationExpressionSyntax.GetParent<MemberDeclarationSyntax>());
+            throw new ShpecAggregationException("unsupported property declaration", invocation.GetParent<MemberDeclarationSyntax>());
         }
     }
 
-    private void AddFrom(InvocationExpressionSyntax invocationExpressionSyntax)
+    static IEnumerable<BaseValidation> GetValidationRules(InvocationExpressionSyntax invocation)
     {
-        if (!invocationExpressionSyntax.GetText().ToString().StartsWith("_property"))
+        if (invocation?.Parent is MemberAccessExpressionSyntax { Name.Identifier.Text: "must" } ma)
         {
-            return;
+            if (ma.Parent is InvocationExpressionSyntax pi)
+            {
+                var validationArgument = pi.ArgumentList.Arguments.Single();
+                if (validationArgument.Expression is not SimpleLambdaExpressionSyntax sles)
+                {
+                    throw new ShpecAggregationException("unrecognized validation expression", invocation);
+                }
+
+                yield return new AdHocValidation(sles);
+                foreach (var vr in GetValidationRules(pi))
+                {
+                    yield return vr;
+                }
+            }
+            else
+            {
+                throw new ShpecAggregationException("unrecognized validation chain", invocation);
+            }
         }
-
-        if (invocationExpressionSyntax.Expression is not MemberAccessExpressionSyntax maes)
-        {
-            throw new ShpecAggregationException("Probably declared your property incorrectly(1)", invocationExpressionSyntax);
-        }
-
-        if (maes.Expression is not InvocationExpressionSyntax ies)
-        {
-            throw new ShpecAggregationException("Probably declared your property incorrectly(2)", invocationExpressionSyntax);
-        }
-
-        if (ies.Expression is not GenericNameSyntax gns)
-        {
-            throw new ShpecAggregationException("Probably declared your property incorrectly(3)", invocationExpressionSyntax);
-        }
-
-        TypeSyntax typeSyntax;
-        try
-        {
-            typeSyntax = gns.TypeArgumentList.Arguments.Single();
-        }
-        catch
-        {
-            throw new Exception($"{gns.TypeArgumentList.Arguments}");
-        }
-
-        var type = typeSyntax switch
-        {
-            PredefinedTypeSyntax x => x.Keyword.Text,
-            IdentifierNameSyntax x => x.Identifier.Text,
-            _ => throw new ShpecAggregationException("failed to get property type", invocationExpressionSyntax),
-        };
-
-
-        var validation = new List<BaseValidation>();
-        var validationArgument = invocationExpressionSyntax.ArgumentList.Arguments.Single();
-        if (validationArgument.Expression is SimpleLambdaExpressionSyntax sles)
-        {
-            validation.Add(new AdHocValidation(sles));
-        }
-
-        var propertyDeclarationSyntax = invocationExpressionSyntax
-            .GetParent<PropertyDeclarationSyntax>();
-
-        var identifier = propertyDeclarationSyntax.Identifier.ToString();
-
-        Captures.Add(new(identifier, type, validation.AsReadOnly(), false));
     }
 }

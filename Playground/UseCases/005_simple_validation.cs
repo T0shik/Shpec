@@ -54,7 +54,7 @@ public partial class SomeEntity
 
 public static class ValidatedProperty
 {
-    public static int Positive => Member<int>.Property().must(x => x > 0);
+    public static int Positive => Member<int>.Property().must(x => x > 0).must(x => x < 100);
     public static int Negative => Member<int>.Property().must(x => x < 0);
     public static int PositiveOrZero => Member<int>.Property().must(x => x >= 0);
     public static int NegativeOrZero => Member<int>.Property().must(x => x <= 0);

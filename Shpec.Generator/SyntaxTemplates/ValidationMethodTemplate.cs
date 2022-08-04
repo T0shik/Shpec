@@ -36,7 +36,7 @@ internal class ValidationMethodTemplate
 
         statements.Add(CreateResultsDeclaration());
 
-        statements.AddRange(seeds.Select(CreatePropertyValidationStatements));
+        statements.AddRange(seeds.Select(x => x.Validations.Select(v => CreatePropertyValidationStatements(v, x))).SelectMany(c => c));
 
         statements.Add(CreateReturnStatement());
 
@@ -48,13 +48,13 @@ internal class ValidationMethodTemplate
     public static LocalDeclarationStatementSyntax CreateResultsDeclaration()
     {
         var validationAggregateInitializer = ObjectCreationExpression(
-            GenericName(Identifier("List"))
-                .WithTypeArgumentList(
-                    TypeArgumentList(
-                        SingletonSeparatedList<TypeSyntax>(
-                            IdentifierName("ValidationError")
-                        ))))
-                .WithArgumentList(ArgumentList());
+                GenericName(Identifier("List"))
+                    .WithTypeArgumentList(
+                        TypeArgumentList(
+                            SingletonSeparatedList<TypeSyntax>(
+                                IdentifierName("ValidationError")
+                            ))))
+            .WithArgumentList(ArgumentList());
 
         return LocalDeclarationStatement(
             VariableDeclaration(
@@ -73,9 +73,9 @@ internal class ValidationMethodTemplate
                                 EqualsValueClause(validationAggregateInitializer)))));
     }
 
-    public static IfStatementSyntax CreatePropertyValidationStatements(PropertySeed propertySeed)
+    public static IfStatementSyntax CreatePropertyValidationStatements(ValidationSeed validationSeed, PropertySeed propertySeed)
     {
-        var ifStatementExpression = TransformValidationExpression.From(propertySeed.Validations.First(), propertySeed);
+        var ifStatementExpression = TransformValidationExpression.From(validationSeed, propertySeed);
 
         return IfStatement(
             ifStatementExpression,
