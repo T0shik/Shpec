@@ -7,7 +7,7 @@
         
         <PackageId>Shpec</PackageId>
         <Version>0.0.1-beta01</Version>
-        <Description>inheritence à la carte</Description>
+        <Description>Member oriented programming.</Description>
         <Authors>Anton Wieslander</Authors>
     </PropertyGroup>
 
