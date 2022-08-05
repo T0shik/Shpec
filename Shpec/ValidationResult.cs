@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Shpec;
+namespace Shpec.Validation;
 
 public record struct ValidationResult(IReadOnlyCollection<ValidationError> Errors)
 {
