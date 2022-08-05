@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Playground", "Playground\Pl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shpec.Generator", "Shpec.Generator\Shpec.Generator.csproj", "{56C05398-0719-4DD6-8030-79577A4796EC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Playground.Controllers", "Playground.Controllers\Playground.Controllers.csproj", "{CC49250E-AA28-4E05-B264-4109D2250E44}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{56C05398-0719-4DD6-8030-79577A4796EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{56C05398-0719-4DD6-8030-79577A4796EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{56C05398-0719-4DD6-8030-79577A4796EC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CC49250E-AA28-4E05-B264-4109D2250E44}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CC49250E-AA28-4E05-B264-4109D2250E44}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CC49250E-AA28-4E05-B264-4109D2250E44}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CC49250E-AA28-4E05-B264-4109D2250E44}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

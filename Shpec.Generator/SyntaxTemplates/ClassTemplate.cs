@@ -77,8 +77,15 @@ class ClassTemplate
             members.Add(validationMember);
         }
 
-        return ClassDeclaration(seed.Identifier)
+        var classDeclaration = ClassDeclaration(seed.Identifier)
             .WithModifiers(TokenList(classTokens))
             .WithMembers(List(members));
+
+        if (validationMember != null)
+        {
+            return ValidationBaseTemplate.AddTo(classDeclaration);
+        }
+        
+        return classDeclaration;
     }
 }

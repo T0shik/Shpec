@@ -2,6 +2,11 @@
 
 namespace Shpec.Validation;
 
+public interface IValidatable
+{
+    ValidationResult Valid();
+}
+
 public record struct ValidationResult(IReadOnlyCollection<ValidationError> Errors)
 {
     public bool Success => Errors.Count == 0;

@@ -31,6 +31,12 @@ class SchemaClassGenerator
             ),
 
             UsingDirective(IdentifierName("Shpec")),
+            
+            UsingDirective(
+                QualifiedName(
+                    IdentifierName("Shpec"),
+                    IdentifierName("Validation")
+                )),
         };
 
         foreach (var usingSeed in _seed.Usings)

@@ -1,4 +1,4 @@
-﻿using Shpec;
+﻿using Shpec.Declare;
 
 #pragma warning disable CS8618
 

@@ -1,4 +1,5 @@
 ﻿using Shpec;
+using Shpec.Declare;
 
 namespace Playground.UseCases;
 
