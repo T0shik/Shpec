@@ -11,6 +11,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shpec.Generator", "Shpec.Ge
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Playground.Controllers", "Playground.Controllers\Playground.Controllers.csproj", "{CC49250E-AA28-4E05-B264-4109D2250E44}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shpec.AspNetCore", "Shpec.AspNetCore\Shpec.AspNetCore.csproj", "{DFE2BCD9-D912-4D4E-98A8-D107F968174F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Playground.MiniApi", "Playground.MiniApi\Playground.MiniApi.csproj", "{A1BB0B5D-31F2-4142-9463-07CC1064C495}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +37,14 @@ Global
 		{CC49250E-AA28-4E05-B264-4109D2250E44}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CC49250E-AA28-4E05-B264-4109D2250E44}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CC49250E-AA28-4E05-B264-4109D2250E44}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DFE2BCD9-D912-4D4E-98A8-D107F968174F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DFE2BCD9-D912-4D4E-98A8-D107F968174F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DFE2BCD9-D912-4D4E-98A8-D107F968174F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DFE2BCD9-D912-4D4E-98A8-D107F968174F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A1BB0B5D-31F2-4142-9463-07CC1064C495}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A1BB0B5D-31F2-4142-9463-07CC1064C495}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A1BB0B5D-31F2-4142-9463-07CC1064C495}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A1BB0B5D-31F2-4142-9463-07CC1064C495}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
