@@ -17,12 +17,16 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Playground", "test\Playgrou
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Playground.Controllers", "test\Playground.Controllers\Playground.Controllers.csproj", "{AFD16992-5CA9-49CB-B311-37F564B41CE5}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "_build", "build\_build.csproj", "{74E99EE8-A675-4D23-8565-85A1B69878EE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{74E99EE8-A675-4D23-8565-85A1B69878EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{74E99EE8-A675-4D23-8565-85A1B69878EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{065460DA-DE54-4189-B6AA-848D10D51360}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{065460DA-DE54-4189-B6AA-848D10D51360}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{065460DA-DE54-4189-B6AA-848D10D51360}.Release|Any CPU.ActiveCfg = Release|Any CPU
