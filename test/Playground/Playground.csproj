@@ -10,8 +10,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Shpec\Shpec.csproj" />
-        <ProjectReference Include="..\Shpec.Generator\Shpec.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+        <ProjectReference Include="..\..\src\Shpec\Shpec.csproj" />
+        <ProjectReference Include="..\..\src\Shpec.Generator\Shpec.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     </ItemGroup>
 
 </Project>
