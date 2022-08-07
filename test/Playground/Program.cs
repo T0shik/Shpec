@@ -19,8 +19,14 @@
     })
     .ToList();
 
-Console.WriteLine($"Passing Use Cases: {useCases.Count(x => x)}/{useCases.Count}");
-
+var total = useCases.Count;
+var success = useCases.Count(x => x);
+Console.WriteLine($"Passing Use Cases: {success}/{total}");
+var failures = total - success;
+if (failures > 0)
+{
+    throw new($"Tests failed with {failures} failures.");
+}
 
 public interface IUseCase
 {

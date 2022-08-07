@@ -19,7 +19,18 @@ class AggregateUsages : ISyntaxReceiver
 
         var clazz = ResolveClassHierarchy(propertyDeclaration.Parent);
         var propertyNames = GetProperties(propertyDeclaration);
-        var namespaceDeclaration = propertyDeclaration.GetParent<FileScopedNamespaceDeclarationSyntax>();
+        BaseNamespaceDeclarationSyntax? namespaceDeclaration = propertyDeclaration.TryGetParent<FileScopedNamespaceDeclarationSyntax>();
+
+        if (namespaceDeclaration == null)
+        {
+            namespaceDeclaration = propertyDeclaration.TryGetParent<NamespaceDeclarationSyntax>();
+        }
+
+        if (namespaceDeclaration == null)
+        {
+            throw new ShpecAggregationException("failed to determine namespace", syntaxNode);
+        }
+
         var ns = namespaceDeclaration.Name.ToString();
 
         var key = $"{ns}.{clazz}";
@@ -65,6 +76,7 @@ class AggregateUsages : ISyntaxReceiver
 
         return new(id, accessibility, ResolveClassHierarchy(parent), statik, record, stract);
     }
+
     private ImmutableArray<string> GetProperties(PropertyDeclarationSyntax propertyDeclaration)
     {
         if (propertyDeclaration.ExpressionBody == null)

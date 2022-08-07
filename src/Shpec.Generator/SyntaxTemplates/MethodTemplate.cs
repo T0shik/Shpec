@@ -9,6 +9,7 @@ public static class MethodTemplate
     public static MethodDeclarationSyntax Transform(MethodDeclarationSyntax origin, BlockSyntax transformedBody)
     {
         return MethodDeclaration(origin.ReturnType, origin.Identifier)
+            .WithParameterList(origin.ParameterList)
             .WithModifiers(TokenList(Token(SyntaxKind.PublicKeyword)))
             .WithBody(transformedBody);
     }
