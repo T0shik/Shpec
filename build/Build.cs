@@ -14,7 +14,6 @@ class Build : NukeBuild
     AbsolutePath OutputDirectory => RootDirectory / ".output";
     AbsolutePath SourceDirectory => RootDirectory / "src";
     AbsolutePath TestDirectory => RootDirectory / "test";
-    AbsolutePath PlaygroundDirectory => TestDirectory / "Playground";
 
     Target Clean => _ => _
         .Executes(() =>
@@ -41,6 +40,7 @@ class Build : NukeBuild
             );
         });
 
+    AbsolutePath PlaygroundDirectory => TestDirectory / "Playground";
     Target TestPlayground => _ => _
         .DependsOn(Compile)
         .Executes(() =>
@@ -51,9 +51,19 @@ class Build : NukeBuild
             );
         });
 
+    AbsolutePath TestControllersDirectory => TestDirectory / "Playground.Controllers.Test";
+    Target TestControllers => _ => _
+        .DependsOn(Compile)
+        .Executes(() =>
+        {
+            DotNetTest(_ => _
+                .SetProjectFile(TestControllersDirectory)
+                .SetConfiguration(Configuration)
+            );
+        });
     AbsolutePath PackagesDirectory => OutputDirectory / "pkg";
     Target Pack => _ => _
-        .DependsOn(TestPlayground)
+        .DependsOn(TestPlayground, TestControllers)
         .Executes(() =>
         {
             DotNetPack(_ => _

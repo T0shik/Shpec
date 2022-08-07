@@ -76,6 +76,7 @@
               "Compile",
               "Pack",
               "Restore",
+              "TestControllers",
               "TestPlayground"
             ]
           }
@@ -90,6 +91,7 @@
               "Compile",
               "Pack",
               "Restore",
+              "TestControllers",
               "TestPlayground"
             ]
           }
