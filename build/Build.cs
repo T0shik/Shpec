@@ -7,11 +7,11 @@ using static Nuke.Common.IO.FileSystemTasks;
 
 class Build : NukeBuild
 {
-    public static int Main() => Execute<Build>(x => x.Run);
+    public static int Main() => Execute<Build>(x => x.Pack);
 
     [Parameter("Configuration to build - Default is 'Debug' (local) or 'Release' (server)")] readonly Configuration Configuration = IsLocalBuild ? Configuration.Debug : Configuration.Release;
 
-    AbsolutePath OutputDirectory => RootDirectory / "output";
+    AbsolutePath OutputDirectory => RootDirectory / ".output";
     AbsolutePath SourceDirectory => RootDirectory / "src";
     AbsolutePath TestDirectory => RootDirectory / "test";
     AbsolutePath PlaygroundDirectory => TestDirectory / "Playground";
@@ -51,9 +51,19 @@ class Build : NukeBuild
             );
         });
 
-    Target Run => _ => _
+    AbsolutePath PackagesDirectory => OutputDirectory / "pkg";
+    Target Pack => _ => _
         .DependsOn(TestPlayground)
         .Executes(() =>
         {
+            DotNetPack(_ => _
+                .SetProject(RootDirectory)
+                .SetConfiguration(Configuration)
+                .SetNoBuild(SucceededTargets.Contains(Compile))
+                .SetOutputDirectory(PackagesDirectory)
+            );
+
+            ReportSummary(_ => _
+                .AddPair("Packages", PackagesDirectory.GlobFiles("*.nupkg").Count.ToString()));
         });
 }

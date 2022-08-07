@@ -74,8 +74,8 @@
             "enum": [
               "Clean",
               "Compile",
+              "Pack",
               "Restore",
-              "Run",
               "TestPlayground"
             ]
           }
@@ -88,8 +88,8 @@
             "enum": [
               "Clean",
               "Compile",
+              "Pack",
               "Restore",
-              "Run",
               "TestPlayground"
             ]
           }
