@@ -4,6 +4,11 @@
         <TargetFramework>net6.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+
+        <PackageId>Shpec.AspNetCore</PackageId>
+        <Version>0.0.1-beta01</Version>
+        <Description>Automatic validation shortcicuiting component for Shpec.</Description>
+        <Authors>Anton Wieslander</Authors>
     </PropertyGroup>
 
     <ItemGroup>
