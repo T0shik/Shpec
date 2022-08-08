@@ -62,10 +62,18 @@ namespace Playground.UseCases.DCI.MoneyTransfer
         public void Set(Account account) => _accounts[account.AccountId] = account;
     }
 
+    // todo: concerns to ponder
+    // - we create a new object rather than cast, this could be expensive, maybe a decorator, or some interface madness?
+    // - because we can't reach context from role it goes in the constructor, there is a fusion going on here.
+    //   assigning the Context isn't hard but it didn't bring joy.
+    //   almost want to have the class span multiple objects, sounds like an abomination. 
+    //   or the role should be a framework unit that we jam the object into.
+    // - This whole thing is tied to the Account class, making the role void.
     public partial class MoneyTransferContext
     {
         private readonly Bank _bank;
 
+        // di friendly
         public MoneyTransferContext(Bank bank)
         {
             _bank = bank;
@@ -75,14 +83,17 @@ namespace Playground.UseCases.DCI.MoneyTransfer
 
         public void Transfer(TransferRequest request)
         {
+            // set the scene
             var (sourceId, destinationId, amount) = request;
             SourceAccount = _bank.Get(sourceId);
             SourceAccount.Context = this;
             DestinationAccount = _bank.Get(destinationId);
             DestinationAccount.Context = this;
 
+            // start play
             SourceAccount.Transfer(amount);
             
+            // clean up
             _bank.Set(SourceAccount);
             _bank.Set(DestinationAccount);
         }
@@ -91,12 +102,14 @@ namespace Playground.UseCases.DCI.MoneyTransfer
         private Destination DestinationAccount { get; set; }
         private static MoneyTransferContext Context => Member<MoneyTransferContext>.Property();
 
+        // role
         public partial class Source
         {
             Members _m => new(Context, AccountId, Amount, SubtractFunds);
 
             public void Transfer(int amount)
             {
+                // interact
                 if (Amount < amount)
                 {
                     throw new InvalidOperationException("insufficient funds");
@@ -107,12 +120,15 @@ namespace Playground.UseCases.DCI.MoneyTransfer
             }
         }
 
+        // role
         public partial class Destination
         {
             Members _m => new(Context, Amount, AddFunds);
             
             public void Transfer(int amount)
             {
+                // interact
+                // interact
                 AddFunds(amount);
             }
         }
