@@ -18,7 +18,7 @@ class AggregateUsages : ISyntaxReceiver
         }
 
         var clazz = ResolveClassHierarchy(propertyDeclaration.Parent);
-        var propertyNames = GetProperties(propertyDeclaration);
+        var propertyNames = GetMembers(propertyDeclaration);
         BaseNamespaceDeclarationSyntax? namespaceDeclaration = propertyDeclaration.TryGetParent<FileScopedNamespaceDeclarationSyntax>();
 
         if (namespaceDeclaration == null)
@@ -77,20 +77,22 @@ class AggregateUsages : ISyntaxReceiver
         return new(id, accessibility, ResolveClassHierarchy(parent), statik, record, stract);
     }
 
-    private ImmutableArray<string> GetProperties(PropertyDeclarationSyntax propertyDeclaration)
+    private ImmutableArray<string> GetMembers(PropertyDeclarationSyntax propertyDeclaration)
     {
         if (propertyDeclaration.ExpressionBody == null)
         {
-            throw new($"No expression body for properties in {propertyDeclaration.FullSpan}");
+            throw new ShpecAggregationException("No expression body for members, use `=>` instead of `=`.", propertyDeclaration);
         }
 
-        if (propertyDeclaration.ExpressionBody.Expression is ImplicitObjectCreationExpressionSyntax a)
+        BaseObjectCreationExpressionSyntax exp = propertyDeclaration.ExpressionBody.Expression switch
         {
-            return a.ArgumentList.Arguments
-                .Select(x => x.Expression.ToString().Split('.').Last())
-                .ToImmutableArray();
-        }
+            ObjectCreationExpressionSyntax x => x,
+            ImplicitObjectCreationExpressionSyntax x => x,
+            _ => throw new ShpecAggregationException("Unknown member registration scenario.", propertyDeclaration),
+        };
 
-        throw new($"Unknown Scenario {propertyDeclaration.FullSpan}");
+        return exp.ArgumentList.Arguments
+            .Select(x => x.Expression.ToString().Split('.').Last())
+            .ToImmutableArray();
     }
 }
