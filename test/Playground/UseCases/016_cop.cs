@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Runtime.CompilerServices;
-using Shpec;
+﻿using Shpec;
 using Shpec.Declare;
 
 namespace Playground.UseCases
@@ -18,6 +16,16 @@ namespace Playground.UseCases
             if (result != 5)
             {
                 throw new("bad math");
+            }
+
+            var division2 = new Division();
+            try
+            {
+                division2.Number2 = 0;
+                throw new("failed to set");
+            }
+            catch (ArgumentException)
+            {
             }
         }
     }
@@ -37,13 +45,22 @@ namespace Playground.UseCases.COP.Numbers
         {
             return Number1 / Number2;
         }
+        
+        [MethodDefinition]
+        public static void ThrowIfZero(int value)
+        {
+            if (value == 0)
+            {
+                throw new ArgumentException();
+            }
+        }
     }
 
     public partial class Division
     {
-        Members _m => new Members(
+        private Members _m => new Members(
             Number1,
-            Number2,
+            Concern.For(Number2).BeforeSet(ThrowIfZero),
             Divide
         );
     }

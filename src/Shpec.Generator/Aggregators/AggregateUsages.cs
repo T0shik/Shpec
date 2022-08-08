@@ -1,5 +1,4 @@
-﻿using System.Collections.Immutable;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Shpec.Generator.Utils;
@@ -18,7 +17,7 @@ class AggregateUsages : ISyntaxReceiver
         }
 
         var clazz = ResolveClassHierarchy(propertyDeclaration.Parent);
-        var propertyNames = GetMembers(propertyDeclaration);
+        var members = GetMembers(propertyDeclaration);
         BaseNamespaceDeclarationSyntax? namespaceDeclaration = propertyDeclaration.TryGetParent<FileScopedNamespaceDeclarationSyntax>();
 
         if (namespaceDeclaration == null)
@@ -37,11 +36,11 @@ class AggregateUsages : ISyntaxReceiver
         if (Captures.ContainsKey(key))
         {
             var d = Captures[key];
-            Captures[key] = d with { Members = d.Members.Concat(propertyNames) };
+            Captures[key] = d with { Members = d.Members.Concat(members).ToArray() };
         }
         else
         {
-            Captures[key] = new(ns, clazz, propertyNames);
+            Captures[key] = new(ns, clazz, members.ToArray());
         }
     }
 
@@ -77,7 +76,7 @@ class AggregateUsages : ISyntaxReceiver
         return new(id, accessibility, ResolveClassHierarchy(parent), statik, record, stract);
     }
 
-    private ImmutableArray<string> GetMembers(PropertyDeclarationSyntax propertyDeclaration)
+    private IEnumerable<MemberUsage> GetMembers(PropertyDeclarationSyntax propertyDeclaration)
     {
         if (propertyDeclaration.ExpressionBody == null)
         {
@@ -88,11 +87,65 @@ class AggregateUsages : ISyntaxReceiver
         {
             ObjectCreationExpressionSyntax x => x,
             ImplicitObjectCreationExpressionSyntax x => x,
-            _ => throw new ShpecAggregationException("Unknown member registration scenario.", propertyDeclaration),
+            _ => throw new ShpecAggregationException("unexpected members declaration.", propertyDeclaration),
         };
 
-        return exp.ArgumentList.Arguments
-            .Select(x => x.Expression.ToString().Split('.').Last())
-            .ToImmutableArray();
+        foreach (var arg in exp.ArgumentList.Arguments)
+        {
+            var withStaticImport = arg.Expression is IdentifierNameSyntax;
+            if (withStaticImport)
+            {
+                yield return new(arg.ToString().LastAccessor(), Array.Empty<ConcernUsage>());
+                continue;
+            }
+
+            var fullReference = arg.Expression is MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax };
+            if (fullReference)
+            {
+                yield return new(arg.ToString().LastAccessor(), Array.Empty<ConcernUsage>());
+                continue;
+            }
+
+            var withConcern = arg.Expression as InvocationExpressionSyntax;
+            if (withConcern != null)
+            {
+                yield return BuildMemberWithConcerns(withConcern);
+                continue;
+            }
+
+            throw new ShpecAggregationException("unexpected member usage declaration", propertyDeclaration);
+        }
+
+        MemberUsage BuildMemberWithConcerns(InvocationExpressionSyntax rootInvocation)
+        {
+            var ies = rootInvocation;
+            List<ConcernUsage> concerns = new();
+            while (true)
+            {
+                var identifier = ies.ArgumentList.Arguments.First().Expression.ToString().LastAccessor();
+                var mae = ies.Expression as MemberAccessExpressionSyntax;
+
+                if (mae.Expression is InvocationExpressionSyntax next)
+                {
+                    var pointCutString = mae.Name.Identifier.Text.LastAccessor();
+
+                    if (!Enum.TryParse<PointCut>(pointCutString, out var pointCut))
+                    {
+                        throw new ShpecAggregationException($"Invalid point cut {pointCutString}", rootInvocation);
+                    }
+
+                    concerns.Add(new(identifier, pointCut));
+                    ies = next;
+                    continue;
+                }
+
+                if (mae.Expression is IdentifierNameSyntax)
+                {
+                    return new MemberUsage(identifier, concerns);
+                }
+
+                throw new ShpecAggregationException("unexpected concern chain", rootInvocation);
+            }
+        }
     }
 }

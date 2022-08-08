@@ -9,14 +9,12 @@ namespace Shpec.Generator;
 
 class SchemaClassGenerator
 {
-    private readonly NamespaceSeed _seed;
-
-    internal SchemaClassGenerator(NamespaceSeed seed)
+    public static (string Name, SourceText Source) Generate(NamespaceSeed seed)
     {
-        _seed = seed;
+        return (GetName(seed), GetSource(seed));
     }
 
-    internal SourceText Source()
+    private static SourceText GetSource(NamespaceSeed seed)
     {
         List<UsingDirectiveSyntax> usings = new()
         {
@@ -31,7 +29,7 @@ class SchemaClassGenerator
             ),
 
             UsingDirective(IdentifierName("Shpec")),
-            
+
             UsingDirective(
                 QualifiedName(
                     IdentifierName("Shpec"),
@@ -39,7 +37,7 @@ class SchemaClassGenerator
                 )),
         };
 
-        foreach (var usingSeed in _seed.Usings)
+        foreach (var usingSeed in seed.Usings)
         {
             usings.Add(UsingDirective(IdentifierName(usingSeed)));
         }
@@ -47,19 +45,17 @@ class SchemaClassGenerator
 
         return CompilationUnit()
             .WithUsings(List(usings))
-            .WithMembers(SingletonList(NamespaceTemplate.Create(_seed)))
+            .WithMembers(SingletonList(NamespaceTemplate.Create(seed)))
             .NormalizeWhitespace()
             .GetText(Encoding.UTF8);
     }
 
-    internal string SourceName => GetName();
-
-    private string GetName()
+    private static string GetName(NamespaceSeed seed)
     {
         var sb = new StringBuilder();
-        sb.Append(_seed.Identifier);
+        sb.Append(seed.Identifier);
         var i = sb.Length;
-        var cc = _seed.Clazz;
+        var cc = seed.Clazz;
         while (cc != null)
         {
             sb.Insert(i, '.');

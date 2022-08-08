@@ -1,5 +1,7 @@
-﻿using Microsoft.CodeAnalysis.CSharp;
+﻿using System.Collections.ObjectModel;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Shpec.Generator.Utils;
 
 namespace Shpec.Generator;
 
@@ -21,7 +23,9 @@ record ComputedPropertyDefinition(
     ExpressionSyntax Expression
 );
 
-record Usage(string Namespace, ClassDeclaration Class, IEnumerable<string> Members);
+record ConcernUsage(string Identifier, PointCut PointCut);
+record MemberUsage(string Identifier, IReadOnlyCollection<ConcernUsage> Concerns);
+record Usage(string Namespace, ClassDeclaration Class, IReadOnlyCollection<MemberUsage> Members);
 
 record ClassDeclaration(
     string Identifier,

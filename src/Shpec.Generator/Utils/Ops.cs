@@ -1,10 +1,8 @@
-﻿using Microsoft.CodeAnalysis.CSharp;
-
-namespace Shpec.Generator.Utils;
+﻿namespace Shpec.Generator.Utils;
 
 internal static class Ops
 {
-    public static void Try(Action operation, string description)
+    public static void Try(string description, Action operation)
     {
         try
         {
@@ -12,29 +10,9 @@ internal static class Ops
         }
         catch (Exception ex)
         {
-            throw new Exception(description + " >>> Original: " + ex.Message);
+            var path = Path.Combine(Directory.GetCurrentDirectory(), "error.log");
+            File.WriteAllText(path, description + Environment.NewLine + Environment.NewLine + ex.ToString());
+            throw;
         }
-    }
-
-    public static T Try<T>(Func<T> operation, string description)
-    {
-        try
-        {
-            return operation();
-        }
-        catch (Exception ex)
-        {
-            throw new Exception(description + " >>> Original: " + ex.Message);
-        }
-    }
-
-    public static SyntaxKind Assert(this SyntaxKind @this, params SyntaxKind[] matches) 
-    {
-        if (!matches.Contains(@this))
-        {
-            throw new Exception("unexpected SyntaxKind");
-        }
-
-        return @this;
     }
 }

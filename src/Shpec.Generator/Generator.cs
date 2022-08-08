@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Shpec.Generator.Functions;
 using Shpec.Generator.SyntaxTemplates;
+using Shpec.Generator.Utils;
 using static Shpec.Generator.Utils.Ops;
 
 namespace Shpec.Generator;
@@ -28,9 +29,9 @@ public class SchemaGenerator : ISourceGenerator
 
         var namespaceSeeds = syntaxReceiver.Usages.Select(declaration =>
         {
-            IReadOnlyCollection<Seed> members = declaration.Members.Select<string, Seed>(x =>
+            IReadOnlyCollection<Seed> members = declaration.Members.Select<MemberUsage, Seed>(x =>
                 {
-                    var propertyDefinition = propertyDeclarations.FirstOrDefault(d => d.Identifier == x);
+                    var propertyDefinition = propertyDeclarations.FirstOrDefault(d => d.Identifier == x.Identifier);
                     if (propertyDefinition != null)
                     {
                         var (identifier, syntaxKind, validation, immutable) = propertyDefinition;
@@ -40,7 +41,7 @@ public class SchemaGenerator : ISourceGenerator
                         return new PropertySeed(identifier, syntaxKind, validationSeed, immutable);
                     }
 
-                    var computedDefinition = computedProperties.FirstOrDefault(d => d.Identifier == x);
+                    var computedDefinition = computedProperties.FirstOrDefault(d => d.Identifier == x.Identifier);
                     if (computedDefinition != null)
                     {
                         var (identifier, syntaxKind, validation, exp) = computedDefinition;
@@ -55,12 +56,12 @@ public class SchemaGenerator : ISourceGenerator
                         );
                     }
 
-                    if (methods.ContainsKey(x))
+                    if (methods.ContainsKey(x.Identifier))
                     {
-                        var block = (BlockSyntax)statementTransformer.Transform(methods[x].Body);
+                        var block = (BlockSyntax)statementTransformer.Transform(methods[x.Identifier].Body);
 
                         return new MethodSeed(
-                            MethodTemplate.Transform(methods[x], block)
+                            MethodTemplate.Transform(methods[x.Identifier], block)
                         );
                     }
 
@@ -83,9 +84,9 @@ public class SchemaGenerator : ISourceGenerator
             var usings = DetermineUsings.From(members);
 
             return new NamespaceSeed(declaration.Namespace, classSeed, usings);
-        }).ToList().AsReadOnly();
+        }).ToList();
 
-        namespaceSeeds = namespaceSeeds
+        var enrichedNS = namespaceSeeds
             .Select((ns, i) =>
             {
                 for (var j = 0; j < namespaceSeeds.Count; j++)
@@ -99,14 +100,15 @@ public class SchemaGenerator : ISourceGenerator
                 }
 
                 return ns;
-            })
-            .ToList()
-            .AsReadOnly();
+            });
 
-
-        foreach (var classGen in namespaceSeeds.Select(x => new SchemaClassGenerator(x)))
+        foreach (var ns in enrichedNS)
         {
-            Try(() => context.AddSource(classGen.SourceName, classGen.Source()), $"generating source for {classGen.SourceName}");
+            Try("generate sources", () =>
+            {
+                var (name, source) = SchemaClassGenerator.Generate(ns);
+                context.AddSource(name, source);
+            });
         }
     }
 

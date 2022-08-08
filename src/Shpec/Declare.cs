@@ -4,7 +4,7 @@ namespace Shpec.Declare;
 
 public class Member<T>
 {
-    public static Property<T> Property() => default;
+    public static Property<T> Property(Func<T> get = null, Action<T> set = null) => default;
     public static Computed<T> Computed(object o) => default;
 }
 
@@ -22,6 +22,4 @@ public class Computed<T> : Member<T>
     public static implicit operator T(Computed<T> T) => default;
 }
 
-public class MethodDefinitionAttribute : Attribute
-{
-}
+public class MethodDefinitionAttribute : Attribute { }
