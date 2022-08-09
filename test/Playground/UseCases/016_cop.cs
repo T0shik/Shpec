@@ -1,5 +1,6 @@
 ﻿using Shpec;
 using Shpec.Declare;
+using Shpec.Validation;
 
 namespace Playground.UseCases
 {

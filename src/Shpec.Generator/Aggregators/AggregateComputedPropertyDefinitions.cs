@@ -17,26 +17,18 @@ class AggregateComputedPropertyDefinitions : ISyntaxReceiver
         }
 
         var invocation = mae.GetParent<InvocationExpressionSyntax>();
-        
+
         var propertyDeclarationSyntax = invocation
             .GetParent<PropertyDeclarationSyntax>();
 
         var identifier = propertyDeclarationSyntax.Identifier.ToString();
-        if (propertyDeclarationSyntax.Type is not PredefinedTypeSyntax predefinedTypeSyntax)
-        {
-            throw new ShpecAggregationException("computed property is not predefined", syntaxNode);
-        }
-        var type = predefinedTypeSyntax.Keyword.Text;
         var argument = invocation.ArgumentList.Arguments.First();
 
-        Captures.Add(
-            new ComputedPropertyDefinition(
-                identifier,
-                type,
-                ImmutableArray<BaseValidation>.Empty,
-                argument.Expression
-            )
-        );
+        Captures.Add(new(
+            identifier,
+            propertyDeclarationSyntax.Type,
+            ImmutableArray<BaseValidation>.Empty,
+            argument.Expression
+        ));
     }
-    
 }

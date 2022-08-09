@@ -20,13 +20,13 @@ class StructTemplate
         {
             members.Add(ctor);
         }
-        
+
         members.AddRange(
             seed.Members.SelectMany(x => x switch
             {
                 ComputedPropertySeed cps => ComputedPropertyTemplate.Create(cps),
-                PropertySeed ps => new() { PropertyTemplate.Create(ps) },
-                ClassSeed cs => new() { ClassTemplate.Create(cs) },
+                PropertySeed ps => PropertyTemplate.Create(ps),
+                ClassSeed cs => new[] { ClassTemplate.Create(cs) },
                 _ => throw new NotImplementedException("Unhandled Seed."),
             })
         );

@@ -1,7 +1,6 @@
 ﻿using Shpec.Declare;
 
 #pragma warning disable CS8618
-
 namespace Playground;
 
 public static class Property

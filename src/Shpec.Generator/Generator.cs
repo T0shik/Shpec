@@ -18,27 +18,30 @@ public class SchemaGenerator : ISourceGenerator
             throw new ArgumentNullException(nameof(SyntaxReceiver));
         }
 
-        var propertyDeclarations = syntaxReceiver.AggregatePropertyDefinitions.Captures;
+        var properties = syntaxReceiver.AggregatePropertyDefinitions.Captures;
         var computedProperties = syntaxReceiver.AggregateComputedPropertyDefinitions.Captures;
         var methods = syntaxReceiver.AggregateMethodDefinitions.Captures;
 
-        var addImplicitConversions = new AddImplicitConversion(propertyDeclarations);
-        var transformFactory = new TransformFactory(propertyDeclarations, computedProperties);
-        var transformComputedPropertyExpression = transformFactory.PropertyExpressionTransformer();
-        var statementTransformer = transformFactory.StatementTransformer();
+        var reWriteMembers = new MemberAccessRewriter(properties, computedProperties);
+        var createConcern = new CreateConcern(methods);
+        var addImplicitConversions = new AddImplicitConversion(properties);
 
-        var namespaceSeeds = syntaxReceiver.Usages.Select(declaration =>
+        var namespaceSeeds = syntaxReceiver.Usages.Select(usage =>
         {
-            IReadOnlyCollection<Seed> members = declaration.Members.Select<MemberUsage, Seed>(x =>
+            IReadOnlyCollection<Seed> members = usage.Members.Select<MemberUsage, Seed>(x =>
                 {
-                    var propertyDefinition = propertyDeclarations.FirstOrDefault(d => d.Identifier == x.Identifier);
+                    var propertyDefinition = properties.FirstOrDefault(d => d.Identifier == x.Identifier);
                     if (propertyDefinition != null)
                     {
                         var (identifier, syntaxKind, validation, immutable) = propertyDefinition;
 
-                        var validationSeed = MapValidation.Map(validation);
-
-                        return new PropertySeed(identifier, syntaxKind, validationSeed, immutable);
+                        return new PropertySeed(
+                            identifier,
+                            syntaxKind,
+                            createConcern.For(x),
+                            MapValidation.Map(validation),
+                            immutable
+                        );
                     }
 
                     var computedDefinition = computedProperties.FirstOrDefault(d => d.Identifier == x.Identifier);
@@ -46,44 +49,48 @@ public class SchemaGenerator : ISourceGenerator
                     {
                         var (identifier, syntaxKind, validation, exp) = computedDefinition;
 
-                        var validationSeed = MapValidation.Map(validation);
-
                         return new ComputedPropertySeed(
                             identifier,
                             syntaxKind,
-                            validationSeed,
-                            transformComputedPropertyExpression.Transform(exp)
+                            createConcern.For(x),
+                            MapValidation.Map(validation),
+                            (ExpressionSyntax)reWriteMembers.Visit(exp)
                         );
                     }
 
                     if (methods.ContainsKey(x.Identifier))
                     {
-                        var block = (BlockSyntax)statementTransformer.Transform(methods[x.Identifier].Body);
+                        var block = (BlockSyntax?)reWriteMembers.Visit(methods[x.Identifier].Body);
+                        if (block == null)
+                        {
+                            throw new ShpecGenerationException("failed to re-write block");
+                        }
 
                         return new MethodSeed(
-                            MethodTemplate.Transform(methods[x.Identifier], block)
+                            MethodTemplate.Transform(methods[x.Identifier], block),
+                            createConcern.For(x)
                         );
                     }
 
-                    throw new($"Failed to find declaration for {x} of {declaration.Class.Identifier}");
+                    throw new($"Failed to find declaration for {x} of {usage.Class.Identifier}");
                 })
                 .ToList()
                 .AsReadOnly();
 
             ClassSeed classSeed = new(
-                declaration.Class.Identifier,
-                declaration.Class.Accessibility,
-                BuildParents(declaration.Class.Parent),
+                usage.Class.Identifier,
+                usage.Class.Accessibility,
+                BuildParents(usage.Class.Parent),
                 members,
                 ImmutableArray<ConversionSeed>.Empty,
-                declaration.Class.Static,
-                declaration.Class.Record,
-                declaration.Class.Struct
+                usage.Class.Static,
+                usage.Class.Record,
+                usage.Class.Struct
             );
 
             var usings = DetermineUsings.From(members);
 
-            return new NamespaceSeed(declaration.Namespace, classSeed, usings);
+            return new NamespaceSeed(usage.Namespace, classSeed, usings);
         }).ToList();
 
         var enrichedNS = namespaceSeeds

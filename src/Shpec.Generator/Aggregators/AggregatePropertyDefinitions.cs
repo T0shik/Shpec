@@ -20,17 +20,9 @@ class AggregatePropertyDefinitions : ISyntaxReceiver
     private void Add(InvocationExpressionSyntax invocation)
     {
         var (identifier, typeSyntax) = GetDeclaration();
-        var type = typeSyntax switch
-        {
-            PredefinedTypeSyntax a => a.Keyword.Text,
-            IdentifierNameSyntax a => a.Identifier.Text,
-            QualifiedNameSyntax a => a.ToString(),
-            ArrayTypeSyntax a => a.ToString(),
-            _ => throw new ShpecAggregationException("unsupported property declaration", invocation.GetParent<MemberDeclarationSyntax>()),
-        };
 
         var validationRules = GetValidationRules(invocation).ToImmutableList();
-        Captures.Add(new(identifier, type, validationRules, false));
+        Captures.Add(new(identifier, typeSyntax, validationRules, false));
 
         (string Identifier, TypeSyntax Type) GetDeclaration()
         {

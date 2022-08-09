@@ -34,7 +34,7 @@ class ConstructorTemplate
         {
             parameters.Add(
                 Parameter(Identifier(propertySeed.Identifier))
-                    .WithType(IdentifierName(propertySeed.Type))
+                    .WithType(propertySeed.Type)
             );
 
             parameters.Add(

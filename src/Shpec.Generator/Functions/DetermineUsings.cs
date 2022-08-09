@@ -1,4 +1,6 @@
 ﻿using System.Numerics;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Shpec.Generator.Utils;
 
 namespace Shpec.Generator.Functions;
 
@@ -10,11 +12,11 @@ internal static class DetermineUsings
 
         foreach (var p in properties.OfType<PropertySeed>())
         {
-            if (p.Type == nameof(BigInteger))
+            if (p.Type.ToString().LastAccessor() == nameof(BigInteger))
             {
                 result.Add("System.Numerics");
             }
-            else if (p.Type == nameof(Guid))
+            else if (p.Type.ToString().LastAccessor() == nameof(Guid))
             {
                 result.Add("System");
             }

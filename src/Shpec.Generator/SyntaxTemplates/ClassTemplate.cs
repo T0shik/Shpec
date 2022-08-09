@@ -54,9 +54,9 @@ class ClassTemplate
             seed.Members.SelectMany(x => x switch
             {
                 ComputedPropertySeed cps => ComputedPropertyTemplate.Create(cps),
-                PropertySeed ps => new() { PropertyTemplate.Create(ps) },
-                ClassSeed cs => new() { Create(cs) },
-                MethodSeed ms => new() { ms.Syntax },
+                PropertySeed ps => PropertyTemplate.Create(ps),
+                ClassSeed cs => new[] { Create(cs) },
+                MethodSeed ms => new[] { ms.Syntax },
                 _ => throw new ShpecGenerationException($"Unhandled Seed in ClassTemplate.CreateClassDeclaration. Seed: {x}"),
             })
         );
@@ -85,7 +85,7 @@ class ClassTemplate
         {
             return ValidationBaseTemplate.AddTo(classDeclaration);
         }
-        
+
         return classDeclaration;
     }
 }
