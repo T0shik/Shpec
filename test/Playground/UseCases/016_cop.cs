@@ -46,11 +46,11 @@ namespace Playground.UseCases.COP.Numbers
         {
             return Number1 / Number2;
         }
-        
+
         [MethodDefinition]
-        public static void ThrowIfZero(int value)
+        public static void ThrowIfZero(int v)
         {
-            if (value == 0)
+            if (v == 0)
             {
                 throw new ArgumentException();
             }
@@ -59,7 +59,7 @@ namespace Playground.UseCases.COP.Numbers
 
     public partial class Division
     {
-        private Members _m => new Members(
+        Members _m => new Members(
             Number1,
             Concern.For(Number2).BeforeSet(ThrowIfZero),
             Divide

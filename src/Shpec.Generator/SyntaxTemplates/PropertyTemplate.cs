@@ -47,6 +47,17 @@ class PropertyTemplate
     public static IEnumerable<MemberDeclarationSyntax> WithField(PropertySeed seed)
     {
         var fieldIdentifier = $"__{seed.Identifier.ToLower()}";
+        var statements = InlineConcernTemplate.ForSetter(seed.Concerns, fieldIdentifier).ToList();
+
+        // final assignment to field; will need to change if function concern is present
+        statements.Add(
+            ExpressionStatement(
+                AssignmentExpression(
+                    SyntaxKind.SimpleAssignmentExpression,
+                    IdentifierName(fieldIdentifier),
+                    IdentifierName("value")))
+        );
+
         return new MemberDeclarationSyntax[]
         {
             FieldDeclaration(VariableDeclaration(seed.Type)
@@ -68,27 +79,7 @@ class PropertyTemplate
                                         Token(SyntaxKind.SemicolonToken)),
                                 AccessorDeclaration(
                                         SyntaxKind.SetAccessorDeclaration)
-                                    .WithBody(
-                                        Block(
-                                            IfStatement(
-                                                BinaryExpression(
-                                                    SyntaxKind.EqualsExpression,
-                                                    IdentifierName("value"),
-                                                    LiteralExpression(
-                                                        SyntaxKind.NumericLiteralExpression,
-                                                        Literal(0))),
-                                                Block(
-                                                    SingletonList<StatementSyntax>(
-                                                        ThrowStatement(
-                                                            ObjectCreationExpression(
-                                                                    IdentifierName("ArgumentException"))
-                                                                .WithArgumentList(
-                                                                    ArgumentList()))))),
-                                            ExpressionStatement(
-                                                AssignmentExpression(
-                                                    SyntaxKind.SimpleAssignmentExpression,
-                                                    IdentifierName(fieldIdentifier),
-                                                    IdentifierName("value")))))
+                                    .WithBody(Block(statements)),
                             })))
         };
     }
