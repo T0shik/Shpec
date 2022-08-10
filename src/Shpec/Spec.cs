@@ -17,10 +17,6 @@ namespace Shpec
     {
         public static Concern<T> For<T>(T v) => null;
     }
-
-    delegate T Function<T>(T v);
-
-    delegate void HelloV<T>(T v);
 }
 
 namespace Shpec.Internal
