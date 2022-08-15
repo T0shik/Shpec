@@ -106,45 +106,68 @@ class AggregateUsages : ISyntaxReceiver
                 continue;
             }
 
-            var withConcern = arg.Expression as InvocationExpressionSyntax;
-            if (withConcern != null)
+            // member with advice
+            if (arg.Expression is TupleExpressionSyntax tes)
             {
-                yield return BuildMemberWithConcerns(withConcern);
+                yield return BuildMemberWithAdvice(tes);
                 continue;
             }
 
             throw new ShpecAggregationException("unexpected member usage declaration", propertyDeclaration);
         }
 
-        MemberUsage BuildMemberWithConcerns(InvocationExpressionSyntax rootInvocation)
+        MemberUsage BuildMemberWithAdvice(TupleExpressionSyntax tes)
         {
-            var ies = rootInvocation;
             List<ConcernUsage> concerns = new();
-            while (true)
+            var member = tes.Arguments[0];
+            if (member.Expression is not IdentifierNameSyntax ins)
             {
-                var identifier = ies.ArgumentList.Arguments.First().Expression.ToString().LastAccessor();
-                var mae = ies.Expression as MemberAccessExpressionSyntax;
+                throw new ShpecAggregationException("bad advice application to property", tes);
+            }
 
-                if (mae.Expression is InvocationExpressionSyntax next)
+            var memberIdentifier = ins.Identifier.Text;
+            for (var i = 1; i < tes.Arguments.Count; i++)
+            {
+                var arg = tes.Arguments[i];
+                if (arg.Expression is not InvocationExpressionSyntax ies)
                 {
-                    var pointCutString = mae.Name.Identifier.Text.LastAccessor();
-
-                    if (!Enum.TryParse<PointCut>(pointCutString, out var pointCut))
-                    {
-                        throw new ShpecAggregationException($"Invalid point cut {pointCutString}", rootInvocation);
-                    }
-
-                    concerns.Add(new(identifier, pointCut));
-                    ies = next;
-                    continue;
+                    throw new ShpecAggregationException("bad advice application syntax", tes);
                 }
 
-                if (mae.Expression is IdentifierNameSyntax)
+                var pointCut = GetPointCut(ies);
+                var adviceIdentifier = GetAdviceIdentifier(ies);
+
+                concerns.Add(new(adviceIdentifier, pointCut));
+            }
+
+            return new MemberUsage(memberIdentifier, concerns);
+
+            PointCut GetPointCut(InvocationExpressionSyntax ies)
+            {
+                var pointCutString = ies.Expression switch
                 {
-                    return new MemberUsage(identifier, concerns);
+                    MemberAccessExpressionSyntax x => x.Name.Identifier.Text,
+                    IdentifierNameSyntax x => x.Identifier.Text,
+                };
+
+                if (Enum.TryParse<PointCut>(pointCutString, out var pointCut))
+                {
+                    return pointCut;
                 }
 
-                throw new ShpecAggregationException("unexpected concern chain", rootInvocation);
+                throw new ShpecAggregationException($"Invalid point cut \"{pointCutString}\"", tes);
+            }
+
+            string GetAdviceIdentifier(InvocationExpressionSyntax ies)
+            {
+                var arg = ies.ArgumentList.Arguments.First();
+
+                return arg.Expression switch
+                {
+                    IdentifierNameSyntax x => x.Identifier.Text,
+                    MemberAccessExpressionSyntax x => x.Name.Identifier.Text,
+                    _ => throw new ShpecAggregationException("failed to get advice identifier", arg),
+                };
             }
         }
     }

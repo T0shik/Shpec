@@ -128,7 +128,6 @@ namespace Playground.UseCases.DCI.MoneyTransfer
             public void Transfer(int amount)
             {
                 // interact
-                // interact
                 AddFunds(amount);
             }
         }

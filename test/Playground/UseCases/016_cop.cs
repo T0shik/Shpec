@@ -1,6 +1,6 @@
 ﻿using Shpec;
 using Shpec.Declare;
-using Shpec.Validation;
+using static Shpec.Advice;
 
 namespace Playground.UseCases
 {
@@ -61,7 +61,8 @@ namespace Playground.UseCases.COP.Numbers
     {
         Members _m => new Members(
             Number1,
-            Concern.For(Number2).BeforeSet(ThrowIfZero),
+            // todo: build fails if the "TestMembers" is removed
+            (Number2, BeforeSet(TestMembers.ThrowIfZero)),
             Divide
         );
     }
