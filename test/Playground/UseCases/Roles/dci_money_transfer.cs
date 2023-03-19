@@ -61,14 +61,10 @@ namespace Playground.UseCases.DCI.MoneyTransfer
 
     public partial class MoneyTransferContext
     {
-        private readonly Bank _bank;
-
         public MoneyTransferContext(Bank bank, int sourceId, int destinationId)
         {
-            _bank = bank;
-
-            SourceAccount = _bank.Get(sourceId);
-            DestinationAccount = _bank.Get(destinationId);
+            SourceAccount = bank.Get(sourceId);
+            DestinationAccount = bank.Get(destinationId);
         }
 
         public void Transfer(int amount)
