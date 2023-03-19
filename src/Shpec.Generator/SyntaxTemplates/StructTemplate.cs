@@ -13,8 +13,9 @@ class StructTemplate
 
         classTokens.Add(Token(SyntaxKind.PartialKeyword));
 
-        List<MemberDeclarationSyntax> members = new();
+        var structDeclaration = StructDeclaration(seed.Identifier);
 
+        List<MemberDeclarationSyntax> members = new();
         var ctor = ConstructorTemplate.CreateConstructor(seed);
         if (ctor != null)
         {
@@ -47,7 +48,12 @@ class StructTemplate
             members.Add(validationMember);
         }
 
-        return StructDeclaration(seed.Identifier)
+        if (seed.Interfaces.Count > 0)
+        {
+            structDeclaration = structDeclaration.WithBaseList(InterfaceImplementationTemplate.Create(seed));
+        }
+        
+        return structDeclaration
             .WithModifiers(TokenList(classTokens))
             .WithMembers(List(members));
     }

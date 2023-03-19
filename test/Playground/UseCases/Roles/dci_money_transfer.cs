@@ -17,8 +17,8 @@ namespace Playground.UseCases
             var bank = new Bank();
             bank.Set(new Account(1, 100));
             bank.Set(new Account(2, 10));
-            var ctx = new MoneyTransferContext(bank);
-            ctx.Transfer(new(1, 2, 50));
+            var ctx = new MoneyTransferContext(bank, 1, 2);
+            ctx.Transfer(50);
 
             if (bank.Get(1).Amount != 50 && bank.Get(2).Amount != 60)
             {
@@ -30,8 +30,6 @@ namespace Playground.UseCases
 
 namespace Playground.UseCases.DCI.MoneyTransfer
 {
-    using static TestMembers;
-
     public class TestMembers
     {
         public static int AccountId = Member<int>.Property();
@@ -73,49 +71,40 @@ namespace Playground.UseCases.DCI.MoneyTransfer
     {
         private readonly Bank _bank;
 
-        public MoneyTransferContext(Bank bank)
+        public MoneyTransferContext(Bank bank, int sourceId, int destinationId)
         {
             _bank = bank;
-        }
 
-        public record TransferRequest(int SourceId, int DestinationId, int Amount);
-
-        public void Transfer(TransferRequest request)
-        {
-            // set the scene
-            var (sourceId, destinationId, amount) = request;
             SourceAccount = _bank.Get(sourceId);
             DestinationAccount = _bank.Get(destinationId);
-
-            // start play
-            SourceAccount.Transfer(amount);
-            
-            // clean up
-            _bank.Set(SourceAccount);
-            _bank.Set(DestinationAccount);
         }
 
-        public partial class SourceAccountRole
+        public void Transfer(int amount)
         {
-            Role _m => new(AccountId, Amount, SubtractFunds);
+            SourceAccount.Transfer(amount);
+        }
+
+        public partial interface ISourceAccount
+        {
+            Members _m => new(AccountId, Amount, SubtractFunds);
 
             public void Transfer(int amount)
             {
-                // interact
                 if (Amount < amount)
                 {
                     throw new InvalidOperationException("insufficient funds");
                 }
 
                 SubtractFunds(amount);
+                // interact
                 Context.DestinationAccount.Transfer(amount);
             }
         }
 
-        public partial class DestinationAccountRole
+        public partial interface IDestinationAccount
         {
-            Role _m => new(Amount, AddFunds);
-            
+            Members _m => new(Amount, AddFunds);
+
             public void Transfer(int amount)
             {
                 // interact

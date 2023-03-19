@@ -1,6 +1,8 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.Collections.Immutable;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Shpec.Generator.Utils;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Shpec.Generator.SyntaxTemplates;
@@ -17,22 +19,11 @@ class RecordTemplate
 
         recordTokens.Add(Token(SyntaxKind.PartialKeyword));
 
-        List<MemberDeclarationSyntax> members = new();
-
-        members.AddRange(
-            seed.Members
-                .Where(x => x is ComputedPropertySeed or ClassSeed)
-                .SelectMany(x => x switch
-                {
-                    ComputedPropertySeed cps => ComputedPropertyTemplate.Create(cps),
-                    ClassSeed cs => new() { ClassTemplate.Create(cs) },
-                    _ => throw new NotImplementedException("Unhandled seed in Record Template."),
-                })
-        );
+        var (parameters, members) = ResolveMembers(seed);
 
         if (child != null)
         {
-            members.Add(child);
+            members = members.Add(child);
         }
 
         // todo: record conversions
@@ -44,10 +35,8 @@ class RecordTemplate
         var validationMember = ValidationMethodTemplate.Create(seed);
         if (validationMember != null)
         {
-            members.Add(validationMember);
+            members = members.Add(validationMember);
         }
-
-        var parameters = CreateParameters(seed.Members.OfType<PropertySeed>());
 
         var declaration = RecordDeclaration(Token(SyntaxKind.RecordKeyword), Identifier(seed.Identifier))
             .WithModifiers(TokenList(recordTokens));
@@ -58,13 +47,57 @@ class RecordTemplate
                 Token(SyntaxKind.StructKeyword));
         }
 
-        return declaration.WithParameterList(ParameterList(parameters))
+        if (seed.Interfaces.Count > 0)
+        {
+            declaration = declaration.WithBaseList(InterfaceImplementationTemplate.Create(seed));
+        }
+
+        return declaration
+            .WithParameterList(
+                ParameterList(CreateParametersSyntax(parameters))
+            )
             .WithOpenBraceToken(Token(SyntaxKind.OpenBraceToken))
             .WithMembers(List(members))
             .WithCloseBraceToken(Token(SyntaxKind.CloseBraceToken));
     }
 
-    private static SeparatedSyntaxList<ParameterSyntax> CreateParameters(IEnumerable<PropertySeed> properties)
+    private record RecordMembers(ImmutableList<PropertySeed> Parameters, ImmutableList<MemberDeclarationSyntax> BodyMembers);
+
+    private static RecordMembers ResolveMembers(ClassSeed seed)
+    {
+        List<PropertySeed> Parameters = new();
+        List<MemberDeclarationSyntax> BodyMembers = new();
+        foreach (var member in seed.Members)
+        {
+            if (member is ComputedPropertySeed cps)
+            {
+                BodyMembers.AddRange(ComputedPropertyTemplate.Create(cps));
+            }
+            else if (member is ClassSeed cs)
+            {
+                BodyMembers.Add(ClassTemplate.Create(cs));
+            }
+            else if (member is PropertySeed { DeclarationSpecificToInterface: true } interfaceSpecificProperty)
+            {
+                BodyMembers.AddRange(PropertyTemplate.Create(interfaceSpecificProperty));
+            }
+            else if (member is PropertySeed { DeclarationSpecificToInterface: false } ps)
+            {
+                Parameters.Add(ps);
+            }
+            else
+            {
+                throw new ShpecTranslationException("unrecognized properties");
+            }
+        }
+
+        return new RecordMembers(
+            Parameters.ToImmutableList(),
+            BodyMembers.ToImmutableList()
+        );
+    }
+
+    private static SeparatedSyntaxList<ParameterSyntax> CreateParametersSyntax(IEnumerable<PropertySeed> properties)
     {
         var parameters = new List<SyntaxNodeOrToken>();
         foreach (var prop in properties)

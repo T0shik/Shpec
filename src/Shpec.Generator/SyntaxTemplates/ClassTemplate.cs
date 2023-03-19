@@ -8,20 +8,21 @@ namespace Shpec.Generator.SyntaxTemplates;
 
 class ClassTemplate
 {
-    public static MemberDeclarationSyntax Create(ClassSeed seed)
+    public static MemberDeclarationSyntax Create(TypeSeed seed)
     {
         return Create(seed, null);
     }
 
-    public static MemberDeclarationSyntax Create(ClassSeed seed, MemberDeclarationSyntax? child)
+    public static MemberDeclarationSyntax Create(TypeSeed seed, MemberDeclarationSyntax? child)
     {
         var declaration = seed switch
         {
-            { Struct: true, Record: true } => RecordTemplate.CreateRecordDeclaration(seed, child),
-            { Record: true } => RecordTemplate.CreateRecordDeclaration(seed, child),
-            { Struct: true } => StructTemplate.CreateStructDeclaration(seed, child),
-            { Record: false } => CreateClassDeclaration(seed, child),
-            _ => throw new Exception(":(")
+            ClassSeed { Struct: true, Record: true } cs => RecordTemplate.CreateRecordDeclaration(cs, child),
+            ClassSeed { Record: true } cs => RecordTemplate.CreateRecordDeclaration(cs, child),
+            ClassSeed { Struct: true } cs => StructTemplate.CreateStructDeclaration(cs, child),
+            ClassSeed { Record: false } cs => CreateClassDeclaration(cs, child),
+            RoleSeed rs => InterfaceTemplate.Create(rs),
+            _ => throw new ShpecGenerationException("failed to translate class branch")
         };
         if (seed.Parent == null)
         {
@@ -41,6 +42,14 @@ class ClassTemplate
 
         classTokens.Add(Token(SyntaxKind.PartialKeyword));
 
+        var classDeclaration = ClassDeclaration(seed.Identifier)
+            .WithModifiers(TokenList(classTokens));
+
+        if (seed.Interfaces.Count > 0)
+        {
+            classDeclaration = classDeclaration.WithBaseList(InterfaceImplementationTemplate.Create(seed));
+        }
+
         List<MemberDeclarationSyntax> members = new();
 
         if (seed.CtorByDefault)
@@ -53,16 +62,7 @@ class ClassTemplate
             }
         }
 
-        members.AddRange(
-            seed.Members.SelectMany(x => x switch
-            {
-                ComputedPropertySeed cps => ComputedPropertyTemplate.Create(cps),
-                PropertySeed ps => PropertyTemplate.Create(ps),
-                ClassSeed cs => new[] { Create(cs) },
-                MethodSeed ms => new[] { ms.Syntax },
-                _ => throw new ShpecGenerationException($"Unhandled Seed in ClassTemplate.CreateClassDeclaration. Seed: {x}"),
-            })
-        );
+        members.AddRange(seed.Members.SelectMany(MemberTemplate.Create));
 
         if (child != null)
         {
@@ -79,11 +79,9 @@ class ClassTemplate
         {
             members.Add(validationMember);
         }
-
-        var classDeclaration = ClassDeclaration(seed.Identifier)
-            .WithModifiers(TokenList(classTokens))
-            .WithMembers(List(members));
-
+        
+        classDeclaration = classDeclaration.WithMembers(List(members));
+        
         if (validationMember != null)
         {
             return ValidationBaseTemplate.AddTo(classDeclaration);

@@ -1,12 +1,12 @@
-﻿using System.Numerics;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
+﻿using System.Collections.Immutable;
+using System.Numerics;
 using Shpec.Generator.Utils;
 
 namespace Shpec.Generator.Functions;
 
 internal static class DetermineUsings
 {
-    internal static IReadOnlyCollection<string> From(IReadOnlyCollection<Seed> properties)
+    internal static ImmutableHashSet<string> From(IReadOnlyCollection<Seed> properties)
     {
         HashSet<string> result = new();
 
@@ -22,6 +22,6 @@ internal static class DetermineUsings
             }
         }
 
-        return result;
+        return result.ToImmutableHashSet();
     }
 }

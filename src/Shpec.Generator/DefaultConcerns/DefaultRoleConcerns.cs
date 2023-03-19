@@ -6,14 +6,14 @@ namespace Shpec.Generator.DefaultConcerns;
 
 internal static class DefaultRoleConcerns
 {
-    internal static ConcernSeed AssignContextConcern(ClassDeclaration roleClass) =>
+    internal static ConcernSeed AssignContextConcern(TypeDeclaration roleType) =>
         new(
-            SetRoleProperty(roleClass),
+            SetRoleProperty(roleType),
             PointCut.AfterSet,
             FunctionType.Action
         );
 
-    private static MethodDeclarationSyntax SetRoleProperty(ClassDeclaration roleClass) =>
+    private static MethodDeclarationSyntax SetRoleProperty(TypeDeclaration roleType) =>
         MethodDeclaration(
                 PredefinedType(Token(SyntaxKind.VoidKeyword)),
                 Identifier("dummy_function_identifier")
@@ -22,7 +22,7 @@ internal static class DefaultRoleConcerns
                 ParameterList(
                     SingletonSeparatedList<ParameterSyntax>(
                         Parameter(Identifier("v"))
-                            .WithType(IdentifierName(roleClass.Identifier))
+                            .WithType(IdentifierName(roleType.Identifier))
                     )
                 )
             )

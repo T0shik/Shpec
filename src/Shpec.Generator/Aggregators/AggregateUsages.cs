@@ -16,23 +16,11 @@ class AggregateUsages : ISyntaxReceiver
             return;
         }
 
-        if (propertyDeclaration.Type is not IdentifierNameSyntax propertyType)
+        if (propertyDeclaration.Type is not IdentifierNameSyntax { Identifier.Text: "Members" } propertyType)
         {
             return;
         }
-        
-        var definitionType = propertyType.Identifier.Text switch
-        {
-            "Members" => DefinitionType.Class,
-            "Role" => DefinitionType.Role,
-            _ => DefinitionType.Unknown,
-        };
 
-        if (definitionType == DefinitionType.Unknown)
-        {
-            return;
-        }
-        
         var clazz = ResolveClassHierarchy(propertyDeclaration.Parent);
         var members = GetMembers(propertyDeclaration);
         BaseNamespaceDeclarationSyntax? namespaceDeclaration = propertyDeclaration.TryGetParent<FileScopedNamespaceDeclarationSyntax>();
@@ -52,27 +40,30 @@ class AggregateUsages : ISyntaxReceiver
         var key = $"{ns}.{clazz}";
         if (Captures.ContainsKey(key))
         {
+            // merge members with existing
             var d = Captures[key];
             Captures[key] = d with { Members = d.Members.Concat(members).ToArray() };
         }
         else
         {
-            Captures[key] = new(ns, clazz, members.ToArray(), definitionType);
+            Captures[key] = new(ns, clazz, members.ToArray());
         }
     }
 
-    private static ClassDeclaration ResolveClassHierarchy(SyntaxNode syntaxNode) => syntaxNode switch
+    private static TypeDeclaration ResolveClassHierarchy(SyntaxNode syntaxNode) => syntaxNode switch
     {
         ClassDeclarationSyntax a => CaptureClassHierarchy(a),
+        InterfaceDeclarationSyntax a => CaptureClassHierarchy(a),
         StructDeclarationSyntax a => CaptureClassHierarchy(a, stract: true),
         RecordDeclarationSyntax { RawKind: (int)SyntaxKind.RecordDeclaration } a => CaptureClassHierarchy(a, record: true),
         RecordDeclarationSyntax { RawKind: (int)SyntaxKind.RecordStructDeclaration } a => CaptureClassHierarchy(a, record: true, stract: true),
         _ => throw new ShpecAggregationException("failed to ResolveClassHierarchy for enclosing type", syntaxNode),
     };
 
-    private static ClassDeclaration CaptureClassHierarchy(TypeDeclarationSyntax typeDeclaration, bool record = false, bool stract = false)
+    private static TypeDeclaration CaptureClassHierarchy(TypeDeclarationSyntax typeDeclaration, bool record = false, bool stract = false)
     {
         var id = typeDeclaration.Identifier.ToString();
+        var typeKey = typeDeclaration.Keyword.Text;
 
         var accessibility = typeDeclaration.Modifiers.First().ValueText switch
         {
@@ -87,10 +78,10 @@ class AggregateUsages : ISyntaxReceiver
         var parent = typeDeclaration.TryGetParent<TypeDeclarationSyntax>();
         if (parent == null)
         {
-            return new(id, accessibility, null, statik, record, stract);
+            return new(id, accessibility, null, typeKey, statik, record, stract);
         }
 
-        return new(id, accessibility, ResolveClassHierarchy(parent), statik, record, stract);
+        return new(id, accessibility, ResolveClassHierarchy(parent), typeKey, statik, record, stract);
     }
 
     private IEnumerable<MemberUsage> GetMembers(PropertyDeclarationSyntax propertyDeclaration)
@@ -104,7 +95,7 @@ class AggregateUsages : ISyntaxReceiver
         {
             ObjectCreationExpressionSyntax x => x,
             ImplicitObjectCreationExpressionSyntax x => x,
-            _ => throw new ShpecAggregationException("unexpected members declaration.", propertyDeclaration),
+            _ => throw new ShpecAggregationException("unexpected members declaration", propertyDeclaration),
         };
 
         foreach (var arg in exp.ArgumentList.Arguments)

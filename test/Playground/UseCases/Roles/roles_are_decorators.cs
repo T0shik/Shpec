@@ -33,9 +33,9 @@ namespace Playground.UseCases.Roles.Decorators
             BirthdayPerson = actor;
         }
 
-        public partial class BirthdayPersonRole
+        public partial interface IBirthdayPerson
         {
-            private Role _r => new Role(
+            private Members _r => new (
                 Property.Age
             );
 

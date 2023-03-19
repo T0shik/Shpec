@@ -7,9 +7,9 @@ class NamespaceTemplate
 {
     public static MemberDeclarationSyntax Create(NamespaceSeed seed)
     {
-        var classTemplate = ClassTemplate.Create(seed.Clazz);
+        var body = ClassTemplate.Create(seed.Clazz);
 
         return FileScopedNamespaceDeclaration(IdentifierName(seed.Identifier))
-            .WithMembers(SingletonList(classTemplate));
+            .WithMembers(SingletonList(body));
     }
 }

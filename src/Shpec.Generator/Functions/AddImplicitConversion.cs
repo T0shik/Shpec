@@ -13,27 +13,28 @@ internal class AddImplicitConversion
 
     public NamespaceSeed To(NamespaceSeed target, NamespaceSeed from)
     {
-        var commonProperties = GetCommonProperties(target.Clazz, from.Clazz).ToList();
+        if (target.Clazz is not ClassSeed targetC || from.Clazz is not ClassSeed fromC)
+        {
+            return target;
+        }
+
+        var commonProperties = GetCommonProperties(targetC, fromC).ToList();
 
         if (commonProperties.Count == 0)
         {
             return target;
         }
 
-        IReadOnlyCollection<string> propSeeds;
-
-        propSeeds = _propertyDefinitions
+        IReadOnlyCollection<string> propSeeds = _propertyDefinitions
             .Where(x => commonProperties.Contains(x.Identifier))
             .Select(x => x.Identifier)
-            .ToList()
-            .AsReadOnly();
-
+            .ToList();
+        
         return target with
         {
-            Clazz = target.Clazz with
+            Clazz = targetC with
             {
-                Conversions = ImmutableArray<ConversionSeed>.Empty
-                    .AddRange(target.Clazz.Conversions)
+                Conversions = targetC.Conversions
                     .Add(new(target, from, propSeeds)),
             }
         };

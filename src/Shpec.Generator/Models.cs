@@ -26,14 +26,13 @@ record ConcernUsage(string Identifier, PointCut PointCut);
 
 record MemberUsage(string Identifier, IReadOnlyCollection<ConcernUsage> Concerns);
 
-record Usage(string Namespace, ClassDeclaration Class, IReadOnlyCollection<MemberUsage> Members, DefinitionType Type);
+record Usage(string Namespace, TypeDeclaration Type, IReadOnlyCollection<MemberUsage> Members);
 
-public enum DefinitionType { Class, Role, Unknown }
-
-record ClassDeclaration(
+record TypeDeclaration(
     string Identifier,
     SyntaxKind Accessibility,
-    ClassDeclaration? Parent,
+    TypeDeclaration? Parent,
+    string Type,
     bool Static,
     bool Record,
     bool Struct
@@ -57,7 +56,9 @@ record PropertySeed(
     IReadOnlyCollection<ConcernSeed> Concerns,
     IReadOnlyCollection<ValidationSeed> Validations,
     bool Immutable,
-    bool IncludeInCtor = true
+    bool IncludeInCtor = true,
+    InterfaceSeed? SpecificInterface = null,
+    bool DeclarationSpecificToInterface = false
 ) : Seed;
 
 record RolePropertySeed(
@@ -81,18 +82,32 @@ record MethodSeed(
 
 record ConversionSeed(NamespaceSeed Target, NamespaceSeed From, IReadOnlyCollection<string> Properties);
 
+record TypeSeed(
+    string Identifier,
+    ClassSeed? Parent
+) : Seed;
+
+record InterfaceSeed(string Identifier);
+
 record ClassSeed(
     string Identifier,
     SyntaxKind Accessibility,
     ClassSeed? Parent,
     IReadOnlyCollection<Seed> Members,
-    IReadOnlyCollection<ConversionSeed> Conversions,
+    ImmutableList<ConversionSeed> Conversions,
+    ImmutableList<InterfaceSeed> Interfaces,
     bool Static,
     bool Record,
     bool Struct,
     bool CtorByDefault = true,
     // only generate conversions when properties match 1:1
     bool StrictConversions = false
-) : Seed;
+) : TypeSeed(Identifier, Parent);
 
-record NamespaceSeed(string Identifier, ClassSeed Clazz, IReadOnlyCollection<string> Usings) : Seed;
+record RoleSeed(
+    string Identifier,
+    ClassSeed? Parent,
+    ImmutableList<Seed> Members
+) : TypeSeed(Identifier, Parent);
+
+record NamespaceSeed(string Identifier, TypeSeed Clazz, ImmutableHashSet<string> Usings) : Seed;

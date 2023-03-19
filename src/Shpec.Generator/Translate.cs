@@ -26,16 +26,14 @@ class TranslationContext
 
     internal IEnumerable<NamespaceSeed> Translate()
     {
-        var addImplicitConversions = new AddImplicitConversion(_properties);
-
-        var namespaceSeeds = _usages.Select(usage =>
+        IReadOnlyList<NamespaceSeed> namespaceSeeds = _usages.Select(usage =>
         {
             ImmutableList<Seed> memberSeeds = GetMemberSeeds(usage);
-            var classSeed = usage.Type switch
+            var classSeed = usage.Type.Type switch
             {
-                DefinitionType.Class => BuildClassType(usage, memberSeeds),
-                DefinitionType.Role => BuildRoleType(usage, memberSeeds),
-                _ => throw new ShpecTranslationException("Managed to capture unknown definition type.")
+                "class" or "record" or "struct" or "record struct" => BuildClassType(usage, memberSeeds),
+                "interface" => BuildRoleType(usage, memberSeeds),
+                _ => throw new ShpecTranslationException($"Managed to capture unknown definition type, {usage.Type.Type}")
             };
 
             var usings = DetermineUsings.From(memberSeeds);
@@ -43,21 +41,10 @@ class TranslationContext
             return new NamespaceSeed(usage.Namespace, classSeed, usings);
         }).ToList();
 
-        return namespaceSeeds
-            .Select((ns, i) =>
-            {
-                for (var j = 0; j < namespaceSeeds.Count; j++)
-                {
-                    if (i == j)
-                    {
-                        continue;
-                    }
+        namespaceSeeds = AddImplicitConversions(namespaceSeeds);
+        namespaceSeeds = AddRoles(namespaceSeeds);
 
-                    ns = addImplicitConversions.To(ns, namespaceSeeds[j]);
-                }
-
-                return ns;
-            });
+        return namespaceSeeds;
     }
 
     private ImmutableList<Seed> GetMemberSeeds(Usage usage)
@@ -109,25 +96,26 @@ class TranslationContext
                     );
                 }
 
-                throw new($"Failed to find declaration for {x} of {usage.Class.Identifier}");
+                throw new($"Failed to find declaration for {x} of {usage.Type.Identifier}");
             })
             .ToImmutableList();
     }
 
-    private ClassSeed BuildClassType(Usage usage, IReadOnlyCollection<Seed> members)
+    private TypeSeed BuildClassType(Usage usage, IReadOnlyCollection<Seed> members)
     {
-        return new(
-            usage.Class.Identifier,
-            usage.Class.Accessibility,
-            BuildParents(usage.Class.Parent),
+        return new ClassSeed(
+            usage.Type.Identifier,
+            usage.Type.Accessibility,
+            BuildParents(usage.Type.Parent),
             members,
-            ImmutableArray<ConversionSeed>.Empty,
-            usage.Class.Static,
-            usage.Class.Record,
-            usage.Class.Struct
+            ImmutableList<ConversionSeed>.Empty,
+            ImmutableList<InterfaceSeed>.Empty,
+            usage.Type.Static,
+            usage.Type.Record,
+            usage.Type.Struct
         );
 
-        static ClassSeed? BuildParents(ClassDeclaration? parent)
+        static ClassSeed? BuildParents(TypeDeclaration? parent)
         {
             return parent == null
                 ? null
@@ -136,77 +124,126 @@ class TranslationContext
                     parent.Accessibility,
                     BuildParents(parent.Parent),
                     ImmutableArray<Seed>.Empty,
-                    ImmutableArray<ConversionSeed>.Empty,
+                    ImmutableList<ConversionSeed>.Empty,
+                    ImmutableList<InterfaceSeed>.Empty,
                     parent.Static,
                     parent.Record,
                     parent.Struct,
-                    CtorByDefault:false
+                    CtorByDefault: false
                 );
         }
     }
 
-    private ClassSeed BuildRoleType(Usage usage, ImmutableList<Seed> members)
+    private TypeSeed BuildRoleType(Usage usage, ImmutableList<Seed> members)
     {
-        if (usage.Class.Parent == null)
+        if (usage.Type.Parent == null)
         {
             throw new ShpecTranslationException("Role has to be contained within a context.");
         }
-        
-        var finalMembers = members.AddRange(
-            CreateRoleToContextMemberSeeds(usage.Class.Parent)
-        );
-        return new(
-            usage.Class.Identifier,
-            usage.Class.Accessibility,
-            BuildParents(usage.Class, true),
-            finalMembers,
-            ImmutableArray<ConversionSeed>.Empty,
-            usage.Class.Static,
-            usage.Class.Record,
-            usage.Class.Struct,
-            StrictConversions: true
-        );
 
-        static ClassSeed? BuildParents(ClassDeclaration @this, bool directParent)
+        var parent = BuildParent(usage.Type)!;
+        var role = new RoleSeed(usage.Type.Identifier, parent, members);
+
+        return role with
         {
-            var parent = @this.Parent;
-            return parent == null
+            Parent = parent with
+            {
+                Members = CreateContextRoleProperties(usage, role).ToImmutableList()
+            },
+            Members = role.Members.AddRange(
+                CreateRoleToContextMemberSeeds(usage, parent)
+            )
+        };
+
+        static ClassSeed? BuildParent(TypeDeclaration @this)
+        {
+            var parent_ = @this.Parent;
+            return parent_ == null
                 ? null
                 : new ClassSeed(
-                    parent.Identifier,
-                    parent.Accessibility,
-                    BuildParents(parent, false),
-                    directParent ? CreateContextRoleProperties(@this).ToImmutableList() : ImmutableArray<Seed>.Empty,
-                    ImmutableArray<ConversionSeed>.Empty,
-                    parent.Static,
-                    parent.Record,
-                    parent.Struct,
-                    CtorByDefault:false
+                    parent_.Identifier,
+                    parent_.Accessibility,
+                    BuildParent(parent_),
+                    ImmutableArray<Seed>.Empty,
+                    ImmutableList<ConversionSeed>.Empty,
+                    ImmutableList<InterfaceSeed>.Empty,
+                    parent_.Static,
+                    parent_.Record,
+                    parent_.Struct,
+                    CtorByDefault: false
                 );
         }
 
-        static IEnumerable<Seed> CreateContextRoleProperties(ClassDeclaration theRole)
+        static IEnumerable<Seed> CreateContextRoleProperties(Usage usage, RoleSeed role)
         {
             yield return new RolePropertySeed(
-                theRole.Identifier.Replace("Role", ""),
-                theRole.Identifier,
+                usage.Type.Identifier.TrimStart('I'),
+                NS.CreateGlobalPath(usage.Namespace, role),
                 Concerns: new[]
                 {
-                    DefaultRoleConcerns.AssignContextConcern(theRole)
+                    DefaultRoleConcerns.AssignContextConcern(usage.Type)
                 }
             );
         }
 
-        static IEnumerable<Seed> CreateRoleToContextMemberSeeds(ClassDeclaration theContext)
+        static IEnumerable<Seed> CreateRoleToContextMemberSeeds(Usage usage, ClassSeed theContext)
         {
             yield return new PropertySeed(
                 "Context",
-                theContext.Identifier,
+                NS.CreateGlobalPath(usage.Namespace, theContext.Identifier),
                 ImmutableList<ConcernSeed>.Empty,
                 ImmutableList<ValidationSeed>.Empty,
                 false,
-                IncludeInCtor: false
+                IncludeInCtor: false,
+                SpecificInterface: new InterfaceSeed(usage.Type.Identifier)
             );
         }
     }
+
+    private IReadOnlyList<NamespaceSeed> AddImplicitConversions(IReadOnlyList<NamespaceSeed> namespaceSeeds)
+    {
+        var addImplicitConversions = new AddImplicitConversion(_properties);
+
+        return namespaceSeeds
+            .Select((ns, i) =>
+            {
+                for (var j = 0; j < namespaceSeeds.Count; j++)
+                {
+                    if (i == j)
+                    {
+                        continue;
+                    }
+
+                    ns = addImplicitConversions.To(ns, namespaceSeeds[j]);
+                }
+
+                return ns;
+            })
+            .ToList();
+    }
+
+    private IReadOnlyList<NamespaceSeed> AddRoles(IReadOnlyList<NamespaceSeed> namespaceSeeds)
+    {
+        var addInterfaceImplementation = new AddInterfaceImplementation(_properties);
+        var roleSpaces = namespaceSeeds.Where(x => x.Clazz is RoleSeed).ToArray();
+        return namespaceSeeds
+            .Select(ns => roleSpaces.Aggregate(ns, addInterfaceImplementation.ViaRole))
+            .ToList();
+    }
+}
+
+public interface A
+{
+    public int aa { get; set; }
+}
+
+public interface B
+{
+    public int aa { get; set; }
+}
+
+public class C : A, B
+{
+    int A.aa { get; set; }
+    int B.aa { get; set; }
 }

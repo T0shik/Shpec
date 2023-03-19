@@ -1,10 +1,11 @@
-﻿using Microsoft.CodeAnalysis.CSharp;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Shpec.Generator.SyntaxTemplates;
 
-class PropertyTemplate
+static class PropertyTemplate
 {
     public static IEnumerable<MemberDeclarationSyntax> Create(PropertySeed seed)
     {
@@ -30,9 +31,7 @@ class PropertyTemplate
         };
 
         return PropertyDeclaration(IdentifierName(seed.Type), Identifier(seed.Identifier))
-            .WithModifiers(
-                TokenList(
-                    Token(SyntaxKind.PublicKeyword)))
+            .WithModifiers(seed)
             .WithAccessorList(
                 AccessorList(
                     List(new[]
@@ -75,7 +74,7 @@ class PropertyTemplate
                 .WithModifiers(TokenList(Token(SyntaxKind.PrivateKeyword))),
 
             PropertyDeclaration(IdentifierName(seed.Type), Identifier(seed.Identifier))
-                .WithModifiers(TokenList(Token(SyntaxKind.PublicKeyword)))
+                .WithModifiers(seed)
                 .WithAccessorList(
                     AccessorList(
                         List(
@@ -92,5 +91,15 @@ class PropertyTemplate
                                     .WithBody(Block(statements)),
                             })))
         };
+    }
+
+    private static PropertyDeclarationSyntax WithModifiers(this PropertyDeclarationSyntax property, PropertySeed seed)
+    {
+        if (seed.DeclarationSpecificToInterface)
+        {
+            return property;
+        }
+
+        return property.WithModifiers(TokenList(Token(SyntaxKind.PublicKeyword)));
     }
 }

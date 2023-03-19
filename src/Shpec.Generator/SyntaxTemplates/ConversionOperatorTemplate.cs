@@ -12,7 +12,7 @@ static class ConversionOperatorTemplate
 
     private static string GetIdentifier(NamespaceSeed seed) => $"{seed.Identifier}.{GetClassIdentifier(seed.Clazz)}";
 
-    private static string GetClassIdentifier(ClassSeed seed) =>
+    private static string GetClassIdentifier(TypeSeed seed) =>
         seed.Parent == null
             ? seed.Identifier
             : $"{GetClassIdentifier(seed.Parent)}.{seed.Identifier}";

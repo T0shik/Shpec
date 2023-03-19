@@ -35,9 +35,9 @@ namespace Playground.UseCases.Roles.SimpleRoles
             Speaker = actor;
         }
 
-        public partial class SpeakerRole
+        public partial interface ISpeaker
         {
-            private Role _r => new Role(
+            private Members _r => new Members(
                 Property.FirstName,
                 Property.LastName
             );
