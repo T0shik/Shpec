@@ -10,7 +10,7 @@ namespace Playground.UseCases
     // Data Context Interaction (https://en.wikipedia.org/wiki/Data,_context_and_interaction)
     // Referenced C# Example (https://github.com/programmersommer/DCISample)
     // Money Transfer Example
-    public class dci : IUseCase
+    public class dci_money_transfer : IUseCase
     {
         public void Execute()
         {
