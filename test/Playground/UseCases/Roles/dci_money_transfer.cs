@@ -59,13 +59,6 @@ namespace Playground.UseCases.DCI.MoneyTransfer
         public void Set(Account account) => _accounts[account.AccountId] = account;
     }
 
-    // todo: concerns to ponder
-    // - we create a new object rather than cast, this could be expensive, maybe a decorator, or some interface madness?
-    // - because we can't reach context from role it goes in the constructor, there is a fusion going on here.
-    //   assigning the Context isn't hard but it didn't bring joy.
-    //   almost want to have the class span multiple objects, sounds like an abomination. 
-    //   or the role should be a framework unit that we jam the object into.
-    // - This whole thing is tied to the Account class, making the role void.
     public partial class MoneyTransferContext
     {
         private readonly Bank _bank;
