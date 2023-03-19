@@ -9,7 +9,7 @@ using static Shpec.Generator.Utils.Ops;
 namespace Shpec.Generator;
 
 [Generator(LanguageNames.CSharp)]
-public class SchemaGenerator : ISourceGenerator
+public class Main : ISourceGenerator
 {
     public void Execute(GeneratorExecutionContext context)
     {
