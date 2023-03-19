@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Shpec;
 using Shpec.Declare;
@@ -20,10 +21,8 @@ namespace Playground.UseCases
             var ctx = new MoneyTransferContext(bank, 1, 2);
             ctx.Transfer(50);
 
-            if (bank.Get(1).Amount != 50 && bank.Get(2).Amount != 60)
-            {
-                throw new Exception("failed transfer");
-            }
+            Debug.Assert(bank.Get(1).Amount == 50, "subtracted money from source account");
+            Debug.Assert(bank.Get(2).Amount == 60, "added money from source account");
         }
     }
 }
