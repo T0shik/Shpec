@@ -86,9 +86,7 @@ namespace Playground.UseCases.DCI.MoneyTransfer
             // set the scene
             var (sourceId, destinationId, amount) = request;
             SourceAccount = _bank.Get(sourceId);
-            SourceAccount.Context = this;
             DestinationAccount = _bank.Get(destinationId);
-            DestinationAccount.Context = this;
 
             // start play
             SourceAccount.Transfer(amount);
@@ -97,15 +95,10 @@ namespace Playground.UseCases.DCI.MoneyTransfer
             _bank.Set(SourceAccount);
             _bank.Set(DestinationAccount);
         }
-        
-        private Source SourceAccount { get; set; }
-        private Destination DestinationAccount { get; set; }
-        private static MoneyTransferContext Context => Member<MoneyTransferContext>.Property();
 
-        // role
-        public partial class Source
+        public partial class SourceAccountRole
         {
-            Members _m => new(Context, AccountId, Amount, SubtractFunds);
+            Role _m => new(AccountId, Amount, SubtractFunds);
 
             public void Transfer(int amount)
             {
@@ -120,10 +113,9 @@ namespace Playground.UseCases.DCI.MoneyTransfer
             }
         }
 
-        // role
-        public partial class Destination
+        public partial class DestinationAccountRole
         {
-            Members _m => new(Context, Amount, AddFunds);
+            Role _m => new(Amount, AddFunds);
             
             public void Transfer(int amount)
             {

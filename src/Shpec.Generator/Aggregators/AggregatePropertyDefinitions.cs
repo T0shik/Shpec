@@ -22,7 +22,7 @@ class AggregatePropertyDefinitions : ISyntaxReceiver
         var (identifier, typeSyntax) = GetDeclaration();
 
         var validationRules = GetValidationRules(invocation).ToImmutableList();
-        Captures.Add(new(identifier, typeSyntax, validationRules, false));
+        Captures.Add(new(identifier, typeSyntax.ToString(), validationRules, false));
 
         (string Identifier, TypeSyntax Type) GetDeclaration()
         {

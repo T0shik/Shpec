@@ -23,18 +23,18 @@ internal class AddImplicitConversion
         IReadOnlyCollection<string> propSeeds;
 
         propSeeds = _propertyDefinitions
-        .Where(x => commonProperties.Contains(x.Identifier))
-        .Select(x => x.Identifier)
-        .ToList()
-        .AsReadOnly();
+            .Where(x => commonProperties.Contains(x.Identifier))
+            .Select(x => x.Identifier)
+            .ToList()
+            .AsReadOnly();
 
         return target with
         {
             Clazz = target.Clazz with
             {
                 Conversions = ImmutableArray<ConversionSeed>.Empty
-                       .AddRange(target.Clazz.Conversions)
-                       .Add(new(target, from, propSeeds)),
+                    .AddRange(target.Clazz.Conversions)
+                    .Add(new(target, from, propSeeds)),
             }
         };
     }
@@ -43,13 +43,13 @@ internal class AddImplicitConversion
     {
         foreach (var member in target.Members)
         {
-            if (member is not PropertySeed fp)
+            if (member is not PropertySeed { IncludeInCtor: true } fp)
             {
                 continue;
             }
 
             var match = from.Members.OfType<PropertySeed>().FirstOrDefault(x => fp.Identifier == x.Identifier);
-            if (match != null)
+            if (match is { IncludeInCtor: true })
             {
                 yield return match.Identifier;
             }

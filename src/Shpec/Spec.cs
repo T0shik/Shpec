@@ -10,6 +10,13 @@ namespace Shpec
         {
         }
     }
+    
+    public class Role
+    {
+        public Role(params object[] members)
+        {
+        }
+    }
 
     public class Advice
     {

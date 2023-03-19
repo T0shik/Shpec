@@ -10,6 +10,14 @@ public class ShpecAggregationException : Exception
     }
 }
 
+public class ShpecTranslationException : Exception
+{
+    public ShpecTranslationException(string message)
+        : base(message)
+    {
+    }
+}
+
 public class ShpecGenerationException : Exception
 {
     public ShpecGenerationException(string message) : base(message)

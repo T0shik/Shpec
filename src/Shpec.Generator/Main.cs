@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using System.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Shpec.Generator.Aggregators;
@@ -21,8 +22,8 @@ public class Main : ISourceGenerator
     {
         var readResult = Read(context);
         
-        var translationResult = new TranslationContext()
-            .Translate(readResult);
+        var translationResult = new TranslationContext(readResult)
+            .Translate();
         
         new OutputTranslation(translationResult)
             .AddSourcesTo(context);

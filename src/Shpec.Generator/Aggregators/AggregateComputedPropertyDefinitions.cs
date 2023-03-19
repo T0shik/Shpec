@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Immutable;
 using Shpec.Generator.Utils;
+using IdentifierNameSyntax = Microsoft.CodeAnalysis.VisualBasic.Syntax.IdentifierNameSyntax;
 
 namespace Shpec.Generator.Aggregators;
 
@@ -23,10 +24,10 @@ class AggregateComputedPropertyDefinitions : ISyntaxReceiver
 
         var identifier = propertyDeclarationSyntax.Identifier.ToString();
         var argument = invocation.ArgumentList.Arguments.First();
-
+        
         Captures.Add(new(
             identifier,
-            propertyDeclarationSyntax.Type,
+            propertyDeclarationSyntax.Type.ToString(),
             ImmutableArray<BaseValidation>.Empty,
             argument.Expression
         ));

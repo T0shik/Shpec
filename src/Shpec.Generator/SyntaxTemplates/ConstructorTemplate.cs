@@ -30,11 +30,11 @@ class ConstructorTemplate
             return null;
         }
 
-        foreach (var propertySeed in properties)
+        foreach (var propertySeed in properties.Where(x => x.IncludeInCtor))
         {
             parameters.Add(
                 Parameter(Identifier(propertySeed.Identifier))
-                    .WithType(propertySeed.Type)
+                    .WithType(IdentifierName(propertySeed.Type))
             );
 
             parameters.Add(

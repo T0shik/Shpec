@@ -29,7 +29,7 @@ class PropertyTemplate
             _ => SyntaxKind.SetAccessorDeclaration,
         };
 
-        return PropertyDeclaration(seed.Type, Identifier(seed.Identifier))
+        return PropertyDeclaration(IdentifierName(seed.Type), Identifier(seed.Identifier))
             .WithModifiers(
                 TokenList(
                     Token(SyntaxKind.PublicKeyword)))
@@ -47,8 +47,13 @@ class PropertyTemplate
     public static IEnumerable<MemberDeclarationSyntax> WithField(PropertySeed seed)
     {
         var fieldIdentifier = $"__{seed.Identifier.ToLower()}";
-        var statements = InlineConcernTemplate.ForSetter(seed.Concerns, fieldIdentifier).ToList();
-
+        var statements = new List<StatementSyntax>();
+        
+        foreach (var seedConcern in seed.Concerns.Where(x => x.PointCut == PointCut.BeforeSet))
+        {
+            statements.AddRange(InlineConcernTemplate.InlineSetterConcerns(seedConcern, fieldIdentifier));
+        }
+        
         // final assignment to field; will need to change if function concern is present
         statements.Add(
             ExpressionStatement(
@@ -58,13 +63,18 @@ class PropertyTemplate
                     IdentifierName("value")))
         );
 
+        foreach (var seedConcern in seed.Concerns.Where(x => x.PointCut == PointCut.AfterSet))
+        {
+            statements.AddRange(InlineConcernTemplate.InlineSetterConcerns(seedConcern, fieldIdentifier));
+        }
+
         return new MemberDeclarationSyntax[]
         {
-            FieldDeclaration(VariableDeclaration(seed.Type)
+            FieldDeclaration(VariableDeclaration(IdentifierName(seed.Type))
                     .WithVariables(SingletonSeparatedList(VariableDeclarator(Identifier(fieldIdentifier)))))
                 .WithModifiers(TokenList(Token(SyntaxKind.PrivateKeyword))),
 
-            PropertyDeclaration(seed.Type, Identifier(seed.Identifier))
+            PropertyDeclaration(IdentifierName(seed.Type), Identifier(seed.Identifier))
                 .WithModifiers(TokenList(Token(SyntaxKind.PublicKeyword)))
                 .WithAccessorList(
                     AccessorList(

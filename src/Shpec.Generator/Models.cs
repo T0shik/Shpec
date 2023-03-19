@@ -1,7 +1,6 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Immutable;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Shpec.Generator.Utils;
 
 namespace Shpec.Generator;
 
@@ -11,14 +10,14 @@ record AdHocValidation(SimpleLambdaExpressionSyntax Exp) : BaseValidation;
 
 record PropertyDefinition(
     string Identifier,
-    TypeSyntax Type,
+    string Type,
     IReadOnlyCollection<BaseValidation> Validation,
     bool Immutable
 );
 
 record ComputedPropertyDefinition(
     string Identifier,
-    TypeSyntax Type,
+    string Type,
     IReadOnlyCollection<BaseValidation> Validation,
     ExpressionSyntax Expression
 );
@@ -27,7 +26,9 @@ record ConcernUsage(string Identifier, PointCut PointCut);
 
 record MemberUsage(string Identifier, IReadOnlyCollection<ConcernUsage> Concerns);
 
-record Usage(string Namespace, ClassDeclaration Class, IReadOnlyCollection<MemberUsage> Members);
+record Usage(string Namespace, ClassDeclaration Class, IReadOnlyCollection<MemberUsage> Members, DefinitionType Type);
+
+public enum DefinitionType { Class, Role, Unknown }
 
 record ClassDeclaration(
     string Identifier,
@@ -52,15 +53,22 @@ record ConcernSeed(
 
 record PropertySeed(
     string Identifier,
-    TypeSyntax Type,
+    string Type,
     IReadOnlyCollection<ConcernSeed> Concerns,
     IReadOnlyCollection<ValidationSeed> Validations,
-    bool Immutable
+    bool Immutable,
+    bool IncludeInCtor = true
 ) : Seed;
+
+record RolePropertySeed(
+    string Identifier,
+    string Type,
+    IReadOnlyCollection<ConcernSeed> Concerns
+) : PropertySeed(Identifier, Type, Concerns, ImmutableList<ValidationSeed>.Empty, true);
 
 record ComputedPropertySeed(
     string Identifier,
-    TypeSyntax Type,
+    string Type,
     IReadOnlyCollection<ConcernSeed> Concerns,
     IReadOnlyCollection<ValidationSeed> Validations,
     ExpressionSyntax Expression
@@ -81,7 +89,9 @@ record ClassSeed(
     IReadOnlyCollection<ConversionSeed> Conversions,
     bool Static,
     bool Record,
-    bool Struct
+    bool Struct,
+    // only generate conversions when properties match 1:1
+    bool StrictConversions = false
 ) : Seed;
 
 record NamespaceSeed(string Identifier, ClassSeed Clazz, IReadOnlyCollection<string> Usings) : Seed;

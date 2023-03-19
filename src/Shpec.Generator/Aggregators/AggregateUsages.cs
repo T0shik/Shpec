@@ -11,11 +11,28 @@ class AggregateUsages : ISyntaxReceiver
 
     public void OnVisitSyntaxNode(SyntaxNode syntaxNode)
     {
-        if (syntaxNode is not PropertyDeclarationSyntax { Type: IdentifierNameSyntax { Identifier.Text: "Members" } } propertyDeclaration)
+        if (syntaxNode is not PropertyDeclarationSyntax propertyDeclaration)
         {
             return;
         }
 
+        if (propertyDeclaration.Type is not IdentifierNameSyntax propertyType)
+        {
+            return;
+        }
+        
+        var definitionType = propertyType.Identifier.Text switch
+        {
+            "Members" => DefinitionType.Class,
+            "Role" => DefinitionType.Role,
+            _ => DefinitionType.Unknown,
+        };
+
+        if (definitionType == DefinitionType.Unknown)
+        {
+            return;
+        }
+        
         var clazz = ResolveClassHierarchy(propertyDeclaration.Parent);
         var members = GetMembers(propertyDeclaration);
         BaseNamespaceDeclarationSyntax? namespaceDeclaration = propertyDeclaration.TryGetParent<FileScopedNamespaceDeclarationSyntax>();
@@ -27,7 +44,7 @@ class AggregateUsages : ISyntaxReceiver
 
         if (namespaceDeclaration == null)
         {
-            throw new ShpecAggregationException("failed to determine namespace", syntaxNode);
+            throw new ShpecAggregationException("failed to determine namespace", propertyDeclaration);
         }
 
         var ns = namespaceDeclaration.Name.ToString();
@@ -40,7 +57,7 @@ class AggregateUsages : ISyntaxReceiver
         }
         else
         {
-            Captures[key] = new(ns, clazz, members.ToArray());
+            Captures[key] = new(ns, clazz, members.ToArray(), definitionType);
         }
     }
 

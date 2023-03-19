@@ -71,7 +71,7 @@ class RecordTemplate
         {
             parameters.Add(
                 Parameter(Identifier(prop.Identifier))
-                    .WithType(prop.Type)
+                    .WithType(IdentifierName(prop.Type))
             );
             parameters.Add(Token(SyntaxKind.CommaToken));
         }

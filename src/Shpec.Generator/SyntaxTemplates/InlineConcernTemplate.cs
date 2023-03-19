@@ -7,11 +7,7 @@ namespace Shpec.Generator.SyntaxTemplates;
 // very infidel component, needs more thought
 class InlineConcernTemplate
 {
-    internal static IEnumerable<StatementSyntax> ForSetter(IEnumerable<ConcernSeed> seeds, string fieldIdentifier) =>
-        seeds
-            .SelectMany(c => InlineSetterConcerns(c, fieldIdentifier));
-
-    private static IEnumerable<StatementSyntax> InlineSetterConcerns(ConcernSeed seed, string fieldIdentifier)
+    public static IEnumerable<StatementSyntax> InlineSetterConcerns(ConcernSeed seed, string fieldIdentifier)
     {
         var parameterName = seed.Declaration.ParameterList.Parameters.First().Identifier.Text;
         if (seed.Type == FunctionType.Action)
