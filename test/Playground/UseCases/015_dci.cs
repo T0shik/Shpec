@@ -73,7 +73,6 @@ namespace Playground.UseCases.DCI.MoneyTransfer
     {
         private readonly Bank _bank;
 
-        // di friendly
         public MoneyTransferContext(Bank bank)
         {
             _bank = bank;

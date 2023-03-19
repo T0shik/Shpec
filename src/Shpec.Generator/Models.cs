@@ -90,6 +90,7 @@ record ClassSeed(
     bool Static,
     bool Record,
     bool Struct,
+    bool CtorByDefault = true,
     // only generate conversions when properties match 1:1
     bool StrictConversions = false
 ) : Seed;

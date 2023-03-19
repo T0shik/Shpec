@@ -43,11 +43,14 @@ class ClassTemplate
 
         List<MemberDeclarationSyntax> members = new();
 
-        var ctor = ConstructorTemplate.CreateConstructor(seed);
-        if (ctor != null)
+        if (seed.CtorByDefault)
         {
-            members.Add(ConstructorTemplate.CreateDefaultConstructor(seed));
-            members.Add(ctor);
+            var ctor = ConstructorTemplate.CreateConstructor(seed);
+            if (ctor != null)
+            {
+                members.Add(ConstructorTemplate.CreateDefaultConstructor(seed));
+                members.Add(ctor);
+            }
         }
 
         members.AddRange(

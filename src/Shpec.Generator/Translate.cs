@@ -139,7 +139,8 @@ class TranslationContext
                     ImmutableArray<ConversionSeed>.Empty,
                     parent.Static,
                     parent.Record,
-                    parent.Struct
+                    parent.Struct,
+                    CtorByDefault:false
                 );
         }
     }
@@ -179,7 +180,8 @@ class TranslationContext
                     ImmutableArray<ConversionSeed>.Empty,
                     parent.Static,
                     parent.Record,
-                    parent.Struct
+                    parent.Struct,
+                    CtorByDefault:false
                 );
         }
 
