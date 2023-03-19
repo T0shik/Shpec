@@ -3,13 +3,34 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using Shpec.Generator.SyntaxTemplates;
+using Shpec.Generator.Utils;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Shpec.Generator;
 
-class SchemaClassGenerator
+class OutputTranslation
 {
-    public static (string Name, SourceText Source) Generate(NamespaceSeed seed)
+    private readonly IEnumerable<NamespaceSeed> _seeds;
+
+    public OutputTranslation(IEnumerable<NamespaceSeed> seeds)
+    {
+        _seeds = seeds;
+    }
+
+
+    public void AddSourcesTo(GeneratorExecutionContext context)
+    {
+        foreach (var ns in _seeds)
+        {
+            Ops.Try("generate sources", () =>
+            {
+                var (name, source) = Generate(ns);
+                context.AddSource(name, source);
+            });
+        }
+    }
+
+    private static (string Name, SourceText Source) Generate(NamespaceSeed seed)
     {
         return (GetName(seed), GetSource(seed));
     }
