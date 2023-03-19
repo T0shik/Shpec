@@ -32,24 +32,3 @@ public interface IUseCase
 {
     void Execute();
 }
-
-// todo: make sure to delete this:
-public class Parent
-{
-    private Child _ch1Ld;
-
-    public Child Ch1ld
-    {
-        get => _ch1Ld;
-        set
-        {
-            _ch1Ld = value;
-            _ch1Ld.Parent = this;
-        }
-    }
-
-    public class Child
-    {
-        public Parent Parent { get; set; }
-    }
-}
