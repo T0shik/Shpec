@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Playground.UseCases.Roles.SimpleRoles;
 using Shpec;
 
@@ -14,6 +15,7 @@ namespace Playground.UseCases.Roles
             };
             var introduction = new Introduction(actor);
             introduction.Do();
+            Debug.Assert(introduction.Speaker == introduction.Reflection, "object identity is destroyed");
         }
     }
 }
@@ -33,6 +35,7 @@ namespace Playground.UseCases.Roles.SimpleRoles
         public Introduction(Actor actor)
         {
             Speaker = actor;
+            Reflection = actor;
         }
 
         public partial interface ISpeaker
@@ -42,16 +45,29 @@ namespace Playground.UseCases.Roles.SimpleRoles
                 Property.LastName
             );
 
-            public string IntroduceThySelf()
+            public void IntroduceThySelf()
             {
-                return $"Hello my name is {FirstName} {LastName}, and I like TDD.";
+                Console.WriteLine($"Self: Hello my name is {FirstName} {LastName}, and I like TDD.");
+                Context.Reflection.IntroduceThee();
+            }
+        }
+        
+        public partial interface IReflection
+        {
+            private Members _r => new Members(
+                Property.FirstName,
+                Property.LastName
+            );
+
+            public void IntroduceThee()
+            {
+                Console.WriteLine($"Reflection: You are {FirstName} {LastName}, and you like TDD.");
             }
         }
 
         public void Do()
         {
-            var introduction = Speaker.IntroduceThySelf();
-            Console.WriteLine(introduction);
+            Speaker.IntroduceThySelf();
         }
     }
 }
